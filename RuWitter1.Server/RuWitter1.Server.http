@@ -1,0 +1,6 @@
+@RuWitter1.Server_HostAddress = http://localhost:5043
+
+GET {{RuWitter1.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
