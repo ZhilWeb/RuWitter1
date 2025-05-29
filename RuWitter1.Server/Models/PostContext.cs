@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 namespace RuWitter1.Server.Models;
 
-public class PostContext : DbContext
+public class PostContext : IdentityDbContext
 {
     public PostContext(DbContextOptions<PostContext> options) : base(options)
         { }

@@ -11,10 +11,12 @@ namespace RuWitter1.Server.Services;
 public class MediaFileService : IMediaFileInterface
 {
     private readonly PostContext _context;
+    private readonly IMediaExtensionInterface _mediaExtensionService;
 
-    public MediaFileService(PostContext context)
+    public MediaFileService(PostContext context, IMediaExtensionInterface mediaExtensionService)
     {
         _context = context;
+        _mediaExtensionService = mediaExtensionService;
     }
 
     public async Task<IFormFile?> Upload(IFormFile formFile)
@@ -24,7 +26,7 @@ public class MediaFileService : IMediaFileInterface
             Console.WriteLine("No file uploaded.");
             return formFile; // BadRequest("No file uploaded.")
         }
-        IEnumerable<MediaExtension> mediaExtensionsEnum = await _context.MediaExtensions.AsNoTracking().ToListAsync();
+        IEnumerable<MediaExtension> mediaExtensionsEnum = await _mediaExtensionService.GetAll();
         List<MediaExtension> mediaExtensions = mediaExtensionsEnum.ToList();
 
 
@@ -40,10 +42,11 @@ public class MediaFileService : IMediaFileInterface
         var newFileName = Guid.NewGuid(); // новое имя без расширения
         try
         {
-            MediaExtension dbfileExtension = await _context.MediaExtensions.AsNoTracking().SingleOrDefaultAsync(p => p.Name == fileExtension); // не должен быть null, так как уже проверен
+            MediaExtension dbfileExtension = await _mediaExtensionService.GetByName(fileExtension); // не должен быть null, так как уже проверен
             var mediaFile = new MediaFile
             {
                 Name = newFileName,
+                ContentType = formFile.ContentType,
                 ExtensionId = dbfileExtension.Id,
                 UploadDate = DateTime.UtcNow,
             };
@@ -77,9 +80,20 @@ public class MediaFileService : IMediaFileInterface
             .ToListAsync();
     }
 
-    public Task<IFormFile?> Download(int id)
+    public async Task<MediaFile?> Download(int id)
     {
-        throw new NotImplementedException();
+        MediaFile? mediaFile = await _context.MediaFiles
+            .AsNoTracking()
+            .SingleOrDefaultAsync(f => f.Id == id);
+
+        MediaExtension? fileExtension = await _mediaExtensionService.GetById(mediaFile.ExtensionId); // установка MediaExtension
+
+        if (fileExtension is not null) 
+        {
+            mediaFile.Extension = fileExtension;
+        }
+
+        return mediaFile;
     }
 
     public Task Update(IFormFile mediaFile)

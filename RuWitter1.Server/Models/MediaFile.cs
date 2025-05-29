@@ -11,6 +11,9 @@ public class MediaFile
     [Required]
     public Guid Name { get; set; }
 
+    [Required]
+    public string ContentType { get; set; }
+
     [JsonIgnore]
     public int ExtensionId { get; set; }
 
