@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 namespace RuWitter1.Server.Models;
 
-public class PostContext : IdentityDbContext
+public class PostContext : IdentityDbContext<DefaultUser>
 {
     public PostContext(DbContextOptions<PostContext> options) : base(options)
         { }

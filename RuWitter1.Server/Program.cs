@@ -26,12 +26,13 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddScoped<RuWitter1.Server.Interfaces.IMediaExtensionInterface, RuWitter1.Server.Services.MediaExtensionService>();
 builder.Services.AddScoped<RuWitter1.Server.Interfaces.IMediaFileInterface, RuWitter1.Server.Services.MediaFileService>();
+builder.Services.AddScoped<RuWitter1.Server.Interfaces.IDefaultUserInterface, RuWitter1.Server.Services.DefaultUserService>();
 
 builder.Services.AddDbContextPool<PostContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("PostContextPostgreSQL")));
 
 builder.Services.AddAuthorization();
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+builder.Services.AddIdentityApiEndpoints<DefaultUser>()
     .AddEntityFrameworkStores<PostContext>();
 
 var app = builder.Build();
@@ -46,7 +47,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapIdentityApi<IdentityUser>();
+app.MapIdentityApi<DefaultUser>();
 
 app.UseHttpsRedirection();
 

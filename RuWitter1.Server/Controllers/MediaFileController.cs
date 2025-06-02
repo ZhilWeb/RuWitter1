@@ -55,7 +55,7 @@ namespace RuWitter1.Server.Controllers
             {
                 return BadRequest("No file uploaded.");
             }
-            IFormFile? oldFormFile = await _mediaFileService.Upload(formFile);
+            Guid? newFileName = await _mediaFileService.Upload(formFile);
 
             return Ok(new { fileName = formFile.FileName, contentType = formFile.ContentType });
         }

@@ -25,4 +25,10 @@ public class MediaFile
     public byte[] Data { get; set; }
 
     public DateTime UploadDate { get; set; } = DateTime.UtcNow;
+
+    [JsonIgnore]
+    public ICollection<DefaultUser>? Users { get; set; }
+
+    [JsonIgnore]
+    public MediaPublication? MediaPublication { get; set; }
 }

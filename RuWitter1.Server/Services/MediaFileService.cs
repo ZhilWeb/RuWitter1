@@ -19,12 +19,12 @@ public class MediaFileService : IMediaFileInterface
         _mediaExtensionService = mediaExtensionService;
     }
 
-    public async Task<IFormFile?> Upload(IFormFile formFile)
+    public async Task<Guid?> Upload(IFormFile formFile)
     {
         if (formFile == null || formFile.Length == 0)
         {
             Console.WriteLine("No file uploaded.");
-            return formFile; // BadRequest("No file uploaded.")
+            return null; // BadRequest("No file uploaded.")
         }
         IEnumerable<MediaExtension> mediaExtensionsEnum = await _mediaExtensionService.GetAll();
         List<MediaExtension> mediaExtensions = mediaExtensionsEnum.ToList();
@@ -36,7 +36,7 @@ public class MediaFileService : IMediaFileInterface
         if (string.IsNullOrEmpty(fileExtension) || !mediaExtensions.Exists(m => m.Name == fileExtension))
         {
             Console.WriteLine("The extension is invalid");
-            return formFile; // The extension is invalid
+            return null; // The extension is invalid
         }
 
         var newFileName = Guid.NewGuid(); // новое имя без расширения
@@ -58,12 +58,12 @@ public class MediaFileService : IMediaFileInterface
             await _context.MediaFiles.AddAsync(mediaFile);
             await _context.SaveChangesAsync();
             Console.WriteLine("Ok");
-            return formFile;
+            return mediaFile.Name;
         }
         catch (Exception ex)
         {
             Console.WriteLine("Error uploading file");
-            return formFile;
+            return null;
         }
 
     }
@@ -99,5 +99,12 @@ public class MediaFileService : IMediaFileInterface
     public Task Update(IFormFile mediaFile)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<MediaFile?> GetByName(Guid? name)
+    {
+        return await _context.MediaFiles
+            .AsNoTracking()
+            .SingleOrDefaultAsync(f => f.Name == name);
     }
 }
