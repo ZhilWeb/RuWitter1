@@ -30,7 +30,12 @@ public class DefaultUser : IdentityUser
     [MaxLength(1000)]
     public string Interests { get; set; } = String.Empty;
 
+    [PersonalData]
+    public ICollection<Post>? Posts { get; set; }
 
-    [JsonIgnore]
-    public ICollection<MediaPublication>? MediaPublications { get; set; }
+    [PersonalData]
+    public ICollection<Comment>? Comments { get; set; }
+
+    [PersonalData]
+    public ICollection<Chat>? Chats { get; set; }
 }

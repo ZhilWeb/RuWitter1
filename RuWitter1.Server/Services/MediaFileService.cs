@@ -5,6 +5,7 @@ using static System.Net.Mime.MediaTypeNames;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace RuWitter1.Server.Services;
 
@@ -106,5 +107,50 @@ public class MediaFileService : IMediaFileInterface
         return await _context.MediaFiles
             .AsNoTracking()
             .SingleOrDefaultAsync(f => f.Name == name);
+    }
+
+    public async Task<MediaFile?> InitMediaFile(IFormFile formFile)
+    {
+        if (formFile == null || formFile.Length == 0)
+        {
+            Console.WriteLine("No file uploaded.");
+            return null; // BadRequest("No file uploaded.")
+        }
+        IEnumerable<MediaExtension> mediaExtensionsEnum = await _mediaExtensionService.GetAll();
+        List<MediaExtension> mediaExtensions = mediaExtensionsEnum.ToList();
+
+
+        var fileName = Path.GetFileName(formFile.FileName);
+        var fileExtension = Path.GetExtension(fileName).ToLowerInvariant();
+
+        if (string.IsNullOrEmpty(fileExtension) || !mediaExtensions.Exists(m => m.Name == fileExtension))
+        {
+            Console.WriteLine("The extension is invalid");
+            return null; // The extension is invalid
+        }
+
+        var newFileName = Guid.NewGuid(); // новое имя без расширения
+        try
+        {
+            MediaExtension dbfileExtension = await _mediaExtensionService.GetByName(fileExtension); // не должен быть null, так как уже проверен
+            var mediaFile = new MediaFile
+            {
+                Name = newFileName,
+                ContentType = formFile.ContentType,
+                ExtensionId = dbfileExtension.Id,
+                UploadDate = DateTime.UtcNow,
+            };
+            // mediaFile.Extension = await _context.MediaExtensions.AsNoTracking().SingleOrDefaultAsync(p => p.Name == fileExtension);
+            using var memoryStream = new MemoryStream();
+            await formFile.CopyToAsync(memoryStream);
+            mediaFile.Data = memoryStream.ToArray();
+
+            return mediaFile;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error init file");
+            return null;
+        }
     }
 }

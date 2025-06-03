@@ -9,6 +9,7 @@ public interface IMediaFileInterface
 
     Task<MediaFile?> GetByName(Guid? name);
     Task<Guid?> Upload(IFormFile mediaFile);
+    Task<MediaFile?> InitMediaFile(IFormFile formFile);
     Task Delete(int id);
     Task Update(IFormFile mediaFile);
 }

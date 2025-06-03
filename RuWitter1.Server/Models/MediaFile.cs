@@ -30,5 +30,8 @@ public class MediaFile
     public ICollection<DefaultUser>? Users { get; set; }
 
     [JsonIgnore]
-    public MediaPublication? MediaPublication { get; set; }
+    public ICollection<Post>? Posts { get; set; }
+
+    [JsonIgnore]
+    public ICollection<Comment>? Comments { get; set; }
 }
