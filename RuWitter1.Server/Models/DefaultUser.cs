@@ -6,9 +6,9 @@ namespace RuWitter1.Server.Models;
 
 public class DefaultUser : IdentityUser
 {
-    [JsonIgnore]
     public int? AvatarId { get; set; }
 
+    [JsonIgnore]
     [PersonalData]
     public MediaFile? Avatar { get; set; }
 
@@ -36,6 +36,7 @@ public class DefaultUser : IdentityUser
     [PersonalData]
     public ICollection<Comment>? Comments { get; set; }
 
+    [JsonIgnore]
     [PersonalData]
-    public ICollection<Chat>? Chats { get; set; }
+    public List<Chat> Chats { get; set; } = new List<Chat>();
 }

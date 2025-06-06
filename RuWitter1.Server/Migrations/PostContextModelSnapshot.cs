@@ -22,6 +22,21 @@ namespace RuWitter1.Server.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ChatDefaultUser", b =>
+                {
+                    b.Property<int>("ChatsId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("text");
+
+                    b.HasKey("ChatsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("ChatDefaultUser");
+                });
+
             modelBuilder.Entity("CommentMediaFile", b =>
                 {
                     b.Property<int>("CommentsId")
@@ -35,6 +50,21 @@ namespace RuWitter1.Server.Migrations
                     b.HasIndex("MediaFilesId");
 
                     b.ToTable("CommentMediaFile");
+                });
+
+            modelBuilder.Entity("MediaFileMessage", b =>
+                {
+                    b.Property<int>("MediaFilesId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MessagesId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("MediaFilesId", "MessagesId");
+
+                    b.HasIndex("MessagesId");
+
+                    b.ToTable("MediaFileMessage");
                 });
 
             modelBuilder.Entity("MediaFilePost", b =>
@@ -184,6 +214,19 @@ namespace RuWitter1.Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("RuWitter1.Server.Models.Chat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Chats");
+                });
+
             modelBuilder.Entity("RuWitter1.Server.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
@@ -196,9 +239,6 @@ namespace RuWitter1.Server.Migrations
                         .IsRequired()
                         .HasMaxLength(10000)
                         .HasColumnType("character varying(10000)");
-
-                    b.Property<int?>("CommentId")
-                        .HasColumnType("integer");
 
                     b.Property<int>("PostId")
                         .HasColumnType("integer");
@@ -370,6 +410,47 @@ namespace RuWitter1.Server.Migrations
                     b.ToTable("MediaFiles");
                 });
 
+            modelBuilder.Entity("RuWitter1.Server.Models.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(10000)
+                        .HasColumnType("character varying(10000)");
+
+                    b.Property<int?>("ChatId")
+                        .IsRequired()
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsReaded")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("PublicDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("RepliedMessageId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatId");
+
+                    b.HasIndex("RepliedMessageId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("RuWitter1.Server.Models.PermittedMediaType", b =>
                 {
                     b.Property<int>("Id")
@@ -414,6 +495,21 @@ namespace RuWitter1.Server.Migrations
                     b.ToTable("Posts");
                 });
 
+            modelBuilder.Entity("ChatDefaultUser", b =>
+                {
+                    b.HasOne("RuWitter1.Server.Models.Chat", null)
+                        .WithMany()
+                        .HasForeignKey("ChatsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RuWitter1.Server.Models.DefaultUser", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CommentMediaFile", b =>
                 {
                     b.HasOne("RuWitter1.Server.Models.Comment", null)
@@ -425,6 +521,21 @@ namespace RuWitter1.Server.Migrations
                     b.HasOne("RuWitter1.Server.Models.MediaFile", null)
                         .WithMany()
                         .HasForeignKey("MediaFilesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MediaFileMessage", b =>
+                {
+                    b.HasOne("RuWitter1.Server.Models.MediaFile", null)
+                        .WithMany()
+                        .HasForeignKey("MediaFilesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RuWitter1.Server.Models.Message", null)
+                        .WithMany()
+                        .HasForeignKey("MessagesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -547,6 +658,31 @@ namespace RuWitter1.Server.Migrations
                     b.Navigation("Extension");
                 });
 
+            modelBuilder.Entity("RuWitter1.Server.Models.Message", b =>
+                {
+                    b.HasOne("RuWitter1.Server.Models.Chat", "Chat")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RuWitter1.Server.Models.Message", "RepliedMessage")
+                        .WithMany()
+                        .HasForeignKey("RepliedMessageId");
+
+                    b.HasOne("RuWitter1.Server.Models.DefaultUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+
+                    b.Navigation("RepliedMessage");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("RuWitter1.Server.Models.Post", b =>
                 {
                     b.HasOne("RuWitter1.Server.Models.DefaultUser", "User")
@@ -556,6 +692,11 @@ namespace RuWitter1.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("RuWitter1.Server.Models.Chat", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("RuWitter1.Server.Models.DefaultUser", b =>

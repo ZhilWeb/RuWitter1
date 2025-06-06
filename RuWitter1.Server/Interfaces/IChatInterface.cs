@@ -4,9 +4,10 @@ namespace RuWitter1.Server.Interfaces;
 
 public interface IChatInterface
 {
-    IEnumerable<Chat>? GetAllChatsByUser(string userId);
-    Task<Chat?> GetChatById(string userId, int chatId);
-    Task CreateChat(string UserId1, string UserId2);
+    IEnumerable<Chat>? GetAllChatsByUser(DefaultUser user);
+    Chat? GetChatById(int chatId);
+    Task CreateChat(DefaultUser hostUser, DefaultUser acceptorUser);
     Task UpdateChat(Chat chat);
     Task DeleteChat(string userId, int chatId);
+    List<string?> GetUsersIdByChat(int chatId);
 }

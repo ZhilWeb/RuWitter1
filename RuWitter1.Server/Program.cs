@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -28,6 +29,9 @@ builder.Services.AddScoped<RuWitter1.Server.Interfaces.IMediaExtensionInterface,
 builder.Services.AddScoped<RuWitter1.Server.Interfaces.IMediaFileInterface, RuWitter1.Server.Services.MediaFileService>();
 builder.Services.AddScoped<RuWitter1.Server.Interfaces.IDefaultUserInterface, RuWitter1.Server.Services.DefaultUserService>();
 builder.Services.AddScoped<RuWitter1.Server.Interfaces.IPostInterface, RuWitter1.Server.Services.PostService>();
+builder.Services.AddScoped<RuWitter1.Server.Interfaces.ICommentInterface, RuWitter1.Server.Services.CommentService>();
+builder.Services.AddScoped<RuWitter1.Server.Interfaces.IChatInterface, RuWitter1.Server.Services.ChatService>();
+builder.Services.AddScoped<RuWitter1.Server.Interfaces.IMessageInterface, RuWitter1.Server.Services.MessageService>();
 
 builder.Services.AddDbContextPool<PostContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("PostContextPostgreSQL")));
@@ -49,6 +53,19 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapIdentityApi<DefaultUser>();
+
+
+app.MapPost("/logout", async (SignInManager<DefaultUser> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Ok();
+}).RequireAuthorization();
+
+app.MapGet("/pingauth", (ClaimsPrincipal user) =>
+{
+    var email = user.FindFirstValue(ClaimTypes.Email); // берёт email пользователя для claim
+    return Results.Json(new {Email = email}); // возвращает email как обычный текст
+}).RequireAuthorization();
 
 app.UseHttpsRedirection();
 

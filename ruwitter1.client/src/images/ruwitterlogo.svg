@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="59.485992mm"
+   height="55.77644mm"
+   viewBox="0 0 59.485992 55.77644"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   sodipodi:docname="ruwitterlogo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#5bc6dd"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.72604517"
+     inkscape:cx="145.99643"
+     inkscape:cy="62.668277"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Слой 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-66.453895,-101.92203)">
+    <g
+       id="g1">
+      <circle
+         style="fill:#666666;fill-opacity:0;stroke:#ffffff;stroke-width:7.1;stroke-dasharray:none;stroke-opacity:1"
+         id="path1"
+         cx="96.570549"
+         cy="137.38528"
+         r="16.763189" />
+      <path
+         style="fill:#666666;fill-opacity:0;stroke:#ffffff;stroke-width:5.16955;stroke-dasharray:none;stroke-opacity:1"
+         d="m 70.003608,124.85089 6.234401,5.2203 3.400582,-4.77285 -7.367928,-3.43048 z"
+         id="path2" />
+      <path
+         style="fill:#666666;fill-opacity:0;stroke:#ffffff;stroke-width:5.19495;stroke-dasharray:none;stroke-opacity:1"
+         d="m 122.40292,124.92932 -6.20736,5.29471 -3.38582,-4.84088 7.33594,-3.47939 z"
+         id="path2-8" />
+      <circle
+         style="fill:#666666;fill-opacity:0;stroke:#ffffff;stroke-width:13.8677;stroke-dasharray:none;stroke-opacity:1"
+         id="path3"
+         cx="96.77021"
+         cy="115.8748"
+         r="7.0189195" />
+      <path
+         style="fill:#666666;fill-opacity:0;stroke:#ffffff;stroke-width:2.19545;stroke-dasharray:none;stroke-opacity:1"
+         d="m 95.002105,128.0095 3.42883,0.0635 -1.71441,4.1908 z"
+         id="path4" />
+    </g>
+  </g>
+</svg>

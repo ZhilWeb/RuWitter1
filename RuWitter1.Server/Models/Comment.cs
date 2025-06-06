@@ -12,7 +12,7 @@ public class Comment : MediaPublication
     [JsonIgnore]
     public Post? Post {  get; set; }
 
-    public int? CommentId { get; set; }
+    public int? RepliedCommentId { get; set; }
 
     [JsonIgnore]
     public Comment? RepliedComment { get; set; }

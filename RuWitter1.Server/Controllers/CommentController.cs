@@ -54,8 +54,8 @@ namespace RuWitter1.Server.Controllers
         }
 
         // POST api/<CommentController>/1/5
-        [HttpPost("{postId}/{commentId}")]
-        public async Task<IActionResult> RepliedPost(string body, int postId, List<IFormFile> formFiles)
+        [HttpPost("{postId}/{hostCommentId}")]
+        public async Task<IActionResult> RepliedPost(string body, int postId, int hostCommentId, List<IFormFile> formFiles)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -64,7 +64,7 @@ namespace RuWitter1.Server.Controllers
                 return Unauthorized();
             }
 
-            await _commentService.CreateComment(userId, postId, body, formFiles);
+            await _commentService.CreateRepliedComment(userId, postId, hostCommentId, body, formFiles);
             return Ok(userId);
         }
 

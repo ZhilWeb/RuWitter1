@@ -80,7 +80,9 @@ public class PostService : IPostInterface
     public IEnumerable<Post>? GetAllPosts(int postsCount = 50)
     {
         return _context.Posts
+            .Include(p => p.MediaFiles)
             .Take(postsCount)
+            .OrderBy(p => p.Id)
             .AsNoTracking()
             .ToList();
     }

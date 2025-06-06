@@ -1,0 +1,57 @@
+.header {
+    height: 100px;
+    background-color: #5BC6DD;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.burger {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 45px;
+    width: 40px;
+}
+
+.burger_rect {
+    width: 100%;
+    height: 8px;
+    display: block;
+    background-color: #FFF;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.logo {
+    height: 50px;
+    width: 50px;
+}
+
+.header_icons{
+    height: 100%;
+    display: none;
+}
+
+.bell{
+    font-size: 50px;
+    color: #FFF;
+}
+
+.avatar {
+    color: #AAA;
+    background-color: #FFF;
+}
+
+@media (min-width: 992px){
+    .burger{
+        display: none;
+    }
+
+    .header_icons {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+} 

@@ -1,0 +1,10 @@
+.content {
+    position: fixed;
+}
+
+
+@media (min-width: 992px){
+    .content {
+        margin-left: 330px;
+    }
+}

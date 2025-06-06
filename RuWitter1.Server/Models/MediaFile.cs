@@ -34,4 +34,7 @@ public class MediaFile
 
     [JsonIgnore]
     public ICollection<Comment>? Comments { get; set; }
+
+    [JsonIgnore]
+    public ICollection<Message>? Messages { get; set; }
 }
