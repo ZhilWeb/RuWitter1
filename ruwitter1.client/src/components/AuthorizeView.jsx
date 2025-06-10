@@ -2,11 +2,9 @@ import React, { useState, useEffect, createContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { LoadingOutlined } from '@ant-design/icons';
 
-
 const UserContext = createContext();
 
 function AuthorizeView({ children }) {
-
     const [authorized, setAuthorized] = useState(false);
     const [loading, setLoading] = useState(true); // add a loading state
     let emptyuser = { email: "" };

@@ -1,18 +1,29 @@
-import './App.css';
+﻿import './App.css';
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+// import Home from './pages/Home';
 import Login from './pages/Login/Login';
 import Register from './pages/Register';
+import AuthorizeView from "./components/AuthorizeView";
+import Posts from "./pages/Posts/Posts";
+import PostIdPage from './pages/PostIdPage/PostIdPage';
+import HomePostIdPage from './pages/HomePostIdPage';
+import Chats from './pages/Chats/Chats';
+import ChatIdPage from './pages/ChatIdPage/ChatIdPage';
 
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/" element={<Home />} />
+                <Route path="/chat" element={<AuthorizeView><ChatIdPage /></AuthorizeView>} />
+                <Route path="/chats" element={<AuthorizeView><Chats /></AuthorizeView>} />
+                <Route path="/post" element={<AuthorizeView><PostIdPage /></AuthorizeView>} />
+                <Route exact={true} path="/login" element={<Login />} />
+                <Route exact={true} path="/register" element={<Register />} />
+                <Route exact={true} path="/" element={<AuthorizeView><Posts /></AuthorizeView>} />
+                
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </BrowserRouter>
     );

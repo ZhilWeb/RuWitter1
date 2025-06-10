@@ -3,6 +3,7 @@ import LogoutLink from "../components/LogoutLink";
 import AuthorizeView, { AuthorizedUser } from "../components/AuthorizeView";
 import Posts from "./Posts/Posts";
 
+/*
 function Home() {
     return (
         <AuthorizeView>
@@ -13,3 +14,4 @@ function Home() {
 }
 
 export default Home;
+*/

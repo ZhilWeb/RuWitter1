@@ -23,16 +23,23 @@ namespace RuWitter1.Server.Controllers
             _userManager = userManager;
         }
 
-        // GET: api/<PostController>
-        [HttpGet]
-        public IEnumerable<Post>? Get()
+        // GET: api/<PostController>/count
+        [HttpGet("count")]
+        public int GetCountOfPosts()
         {
-            return _postService.GetAllPosts();
+            return _postService.GetCountOfPosts();
         }
 
-        // GET api/<PostController>/5
-        [HttpGet("{id}")]
-        public async Task<Post?> Get(int id)
+        // GET: api/<PostController>
+        [HttpGet("{lastPostId}")]
+        public IEnumerable<Post>? Get(int lastPostId)
+        {
+            return _postService.GetAllPosts(lastPostId);
+        }
+
+        // GET api/<PostController>/post/5
+        [HttpGet("post/{id}")]
+        public async Task<Post?> GetById(int id)
         {
             return await _postService.GetPostById(id);
         }

@@ -39,7 +39,7 @@ const SidebarRuW = ({isActive }) => {
                 </div>
                 <div>
                     <PicRightOutlined className={cl.icons} />
-                    <a href="#">Новости</a>
+                    <a href="/">Новости</a>
                 </div>
                 <div>
                     <FormOutlined className={cl.icons } />
@@ -55,7 +55,7 @@ const SidebarRuW = ({isActive }) => {
                 </div>
                 <div>
                     <MessageOutlined className={cl.icons} />
-                    <a href="#">Сообщения</a>
+                    <a href="/chats">Сообщения</a>
                 </div>
                 <div>
                     <LogoutOutlined className={cl.icons} />

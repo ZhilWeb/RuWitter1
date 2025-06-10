@@ -67,10 +67,10 @@ export default defineConfig({
                 target: 'https://localhost:7091/',
                 secure: false
             },
-            '^/api/Post': {
+            '^/api': {
                 target: 'https://localhost:7091/',
                 secure: false
-            },
+            }
         },
         port: 58122,
         https: {

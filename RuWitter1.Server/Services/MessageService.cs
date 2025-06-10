@@ -92,12 +92,18 @@ public class MessageService : IMessageInterface
             throw new Exception("Chat has not found.");
         }
 
-        return await _context.Messages.AsNoTracking().Where(m => m.ChatId == existingChat.Id).ToListAsync();
+        return await _context.Messages
+            .Include(m => m.MediaFiles)
+            .Where(m => m.ChatId == existingChat.Id)
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public Message? GetMessageById(Chat chat, int messageId)
     {
-        throw new NotImplementedException();
+        return _context.Messages
+            .Include(m => m.MediaFiles)
+            .SingleOrDefault(m => m.Id == messageId);
     }
 
     public Task UpdateChat(Chat chat)

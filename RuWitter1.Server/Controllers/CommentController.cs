@@ -25,7 +25,7 @@ namespace RuWitter1.Server.Controllers
         }
 
         // GET: api/<CommentController>
-        [HttpGet("{postId}")]
+        [HttpGet("post/{postId}")]
         public async Task<IEnumerable<Comment>?> Get(int postId)
         {
             return await _commentService.GetAllOfPost(postId);

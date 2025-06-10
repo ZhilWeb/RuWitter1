@@ -77,20 +77,27 @@ public class PostService : IPostInterface
         throw new NotImplementedException();
     }
 
-    public IEnumerable<Post>? GetAllPosts(int postsCount = 50)
+    public IEnumerable<Post>? GetAllPosts(int lastPostId)
     {
         return _context.Posts
+            .Include(p => p.Comments)
             .Include(p => p.MediaFiles)
-            .Take(postsCount)
             .OrderBy(p => p.Id)
+            .Where(p => p.Id > lastPostId)
+            .Take(10)
             .AsNoTracking()
             .ToList();
+    }
+
+    public int GetCountOfPosts()
+    {
+        return _context.Posts.Count();
     }
 
     public async Task<Post?> GetPostById(int postId)
     {
         return await _context.Posts
-            .Include(p => p.Comments)
+            .Include(p => p.MediaFiles)
             .AsNoTracking()
             .SingleOrDefaultAsync(p => p.Id == postId);
     }

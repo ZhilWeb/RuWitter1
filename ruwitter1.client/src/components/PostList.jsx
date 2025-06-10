@@ -2,7 +2,7 @@
 import PostItem from "./PostItem";
 
 
-const PostList = ({ posts, title, remove }) => {
+const PostList = ({ posts, remove }) => {
 
     if (!posts.length) {
         return (
@@ -15,7 +15,7 @@ const PostList = ({ posts, title, remove }) => {
     return (
         <div className="posts">
             {posts.map((post, index) =>
-                <PostItem remove={remove} number={index + 1} post={post} key={post.id} />
+                <PostItem remove={remove} number={index + 1} post={post} key={post.id}/>
             )}
         </div>
     );

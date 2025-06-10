@@ -58,6 +58,9 @@ public class ChatService : IChatInterface
         return _context.Chats
             .Include(c => c.Users)
             .Include(c => c.Messages)
+            .Where(c => c.Users.Contains(user))
+            .OrderBy(p => p.Id)
+            .AsNoTracking()
             .ToList();
     }
 

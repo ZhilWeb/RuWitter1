@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RuWitter1.Server.Interfaces;
 using RuWitter1.Server.Models;
@@ -59,11 +61,39 @@ namespace RuWitter1.Server.Controllers
 
             if (User.Identity.Name != user.UserName && !User.IsInRole("Admin"))
             {
-                return Forbid();
+                // возвращаем общедоступные персональные данные
+                var personalData = new DefaultUserPersonalDataUpdate
+                {
+                    UserId = user.Id,
+                    Nickname = user.Nickname,
+                    Age = user.Age,
+                    BriefInformation = user.BriefInformation,
+                    City = user.City,
+                    Interests = user.Interests,
+                    AvatarId = user.AvatarId,
+                };
+
+                return Ok(personalData);
             }
 
             return Ok(user);
         }
+
+
+        // GET api/<DefaultUserController>/user
+        [HttpGet("user")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new Exception("Unauthorized");
+            }
+
+            return Ok(userId);
+        }
+
 
         // PUT api/<DefaultUserController>/5
         [HttpPut("{id}")]
@@ -93,7 +123,10 @@ namespace RuWitter1.Server.Controllers
         [HttpPut("personaldata/{id}")]
         public async Task<IActionResult> UpdatePersonalData([FromBody] DefaultUserPersonalDataUpdate updatedUserData)
         {
-
+            if(updatedUserData == null) 
+            {
+                return BadRequest();
+            }
             var existingUser = await _defaultUserService.GetUserByIdAsync(updatedUserData.UserId);
 
             if (existingUser == null)

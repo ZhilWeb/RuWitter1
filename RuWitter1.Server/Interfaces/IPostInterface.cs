@@ -4,9 +4,10 @@ namespace RuWitter1.Server.Interfaces;
 
 public interface IPostInterface
 {
-    IEnumerable<Post>? GetAllPosts(int postsCount = 50);
+    IEnumerable<Post>? GetAllPosts(int lastPostId);
     Task<Post?> GetPostById(int postId);
     Task CreatePost(string existingUserId, string body, List<IFormFile> files);
     Task UpdatePost(Post post);
     Task DeletePost(int postId);
+    int GetCountOfPosts();
 }

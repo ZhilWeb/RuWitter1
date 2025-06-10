@@ -3,6 +3,7 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RuWitter1.Server.Interfaces;
+using RuWitter1.Server.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -28,7 +29,7 @@ namespace RuWitter1.Server.Controllers
 
         // GET api/<MediaFileController>/5
         [HttpGet("{id}"), Authorize]
-        public async Task<IActionResult> Get(int id)
+        public async Task<MediaFile> Get(int id)
         {
             try
             {
@@ -36,14 +37,14 @@ namespace RuWitter1.Server.Controllers
 
                 if (mediaFile == null)
                 {
-                    return NotFound();
+                    throw new Exception("File has not found.");
                 }
 
-                return File(mediaFile.Data, mediaFile.ContentType, String.Concat(Convert.ToString(mediaFile.Name), mediaFile.Extension.Name));
+                return mediaFile;
             }
             catch (NullReferenceException ex) 
             {
-                return NotFound();
+                throw new Exception("File has not found.");
             }
         }
 

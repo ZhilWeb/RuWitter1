@@ -164,7 +164,12 @@ public class CommentService : ICommentInterface
             throw new Exception("Post has not found.");
         }
 
-        return await _context.Comments.AsNoTracking().Where(c => c.PostId == existingPost.Id).ToListAsync();
+        return await _context.Comments
+            .Include(c => c.MediaFiles)
+            .Where(c => c.PostId == existingPost.Id)
+            .OrderBy(p => p.Id)
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public Task<Post?> GetCommentById(int commentId)

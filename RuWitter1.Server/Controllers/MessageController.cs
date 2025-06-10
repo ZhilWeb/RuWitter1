@@ -76,8 +76,19 @@ namespace RuWitter1.Server.Controllers
 
         // POST api/<MessageController>/1
         [HttpPost("{chatId}")]
-        public async Task<IActionResult> Post(string body, int chatId, List<IFormFile> formFiles)
+        public async Task<IActionResult> Post(MessageDTO dto)
         {
+            // string body, int chatId, List<IFormFile> formFiles
+
+            int chatId = dto.chatId;
+            string? body = dto.Content;
+            List<IFormFile> formFiles = new List<IFormFile>();
+            if (dto.File != null) 
+            {
+                formFiles.Add(dto.File);
+            }
+            
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
