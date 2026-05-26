@@ -79,9 +79,27 @@ public class PostService : IPostInterface
 
     public IEnumerable<Post>? GetAllPosts(int lastPostId)
     {
-        return _context.Posts
-            .Include(p => p.Comments)
+        IEnumerable<Comment>? comments = _context.Comments
+            .Where(c => c.PostId == lastPostId)
+            .AsNoTracking()
+            .ToList();
+
+        if(comments == null) 
+        {
+            return _context.Posts
             .Include(p => p.MediaFiles)
+            .OrderBy(p => p.Id)
+            .Where(p => p.Id > lastPostId)
+            .Take(10)
+            .AsNoTracking()
+            .ToList();
+        }
+
+
+        return _context.Posts
+            .Include(p => p.MediaFiles)
+            .Include(p => p.Comments!)
+            .ThenInclude(c => c.MediaFiles)
             .OrderBy(p => p.Id)
             .Where(p => p.Id > lastPostId)
             .Take(10)

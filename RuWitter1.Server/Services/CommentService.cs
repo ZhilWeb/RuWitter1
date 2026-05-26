@@ -42,8 +42,7 @@ public class CommentService : ICommentInterface
                 UserId = existingUserId,
                 Body = body,
                 MediaFiles = null,
-                PostId = existingPost.Id,
-                RepliedCommentId = null
+                PostId = existingPost.Id
             };
 
             await _context.Comments.AddAsync(comment);
@@ -70,8 +69,7 @@ public class CommentService : ICommentInterface
             UserId = existingUserId,
             Body = body,
             MediaFiles = postMediaFiles,
-            PostId = existingPost.Id,
-            RepliedCommentId = null,
+            PostId = existingPost.Id
         };
 
         await _context.Comments.AddAsync(commentWithFiles);
@@ -113,7 +111,6 @@ public class CommentService : ICommentInterface
                 Body = body,
                 MediaFiles = null,
                 PostId = existingPost.Id,
-                RepliedCommentId = existingHostComment.Id,
             };
 
             await _context.Comments.AddAsync(comment);
@@ -141,7 +138,6 @@ public class CommentService : ICommentInterface
             Body = body,
             MediaFiles = postMediaFiles,
             PostId = existingPost.Id,
-            RepliedCommentId = existingHostComment.Id,
         };
 
         await _context.Comments.AddAsync(commentWithFiles);

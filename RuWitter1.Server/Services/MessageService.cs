@@ -40,8 +40,7 @@ public class MessageService : IMessageInterface
                 UserId = hostUser.Id,
                 Body = body,
                 MediaFiles = null,
-                ChatId = existingChat.Id,
-                RepliedMessageId = null
+                ChatId = existingChat.Id
             };
 
             await _context.Messages.AddAsync(message);
@@ -68,8 +67,7 @@ public class MessageService : IMessageInterface
             UserId = hostUser.Id,
             Body = body,
             MediaFiles = postMediaFiles,
-            ChatId = existingChat.Id,
-            RepliedMessageId = null
+            ChatId = existingChat.Id
         };
 
         await _context.Messages.AddAsync(messageWithFiles);

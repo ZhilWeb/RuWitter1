@@ -32,6 +32,7 @@ builder.Services.AddScoped<RuWitter1.Server.Interfaces.IPostInterface, RuWitter1
 builder.Services.AddScoped<RuWitter1.Server.Interfaces.ICommentInterface, RuWitter1.Server.Services.CommentService>();
 builder.Services.AddScoped<RuWitter1.Server.Interfaces.IChatInterface, RuWitter1.Server.Services.ChatService>();
 builder.Services.AddScoped<RuWitter1.Server.Interfaces.IMessageInterface, RuWitter1.Server.Services.MessageService>();
+builder.Services.AddScoped<RuWitter1.Server.Interfaces.ICommunityInterface, RuWitter1.Server.Services.CommunityService>();
 
 builder.Services.AddDbContextPool<PostContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("PostContextPostgreSQL")));

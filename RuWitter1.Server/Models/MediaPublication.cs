@@ -7,11 +7,7 @@ public class MediaPublication
     [Required]
     public int Id { get; set; }
 
-    [Required]
-    public string UserId { get; set; }
-
-    [Required]
-    public DefaultUser User { get; set; }
+    
 
     [Required]
     [MaxLength(10000)]

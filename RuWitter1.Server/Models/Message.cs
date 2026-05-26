@@ -5,10 +5,11 @@ namespace RuWitter1.Server.Models;
 
 public class Message : MediaPublication
 {
-    public int? RepliedMessageId { get; set; }
+    [Required]
+    public string UserId { get; set; }
 
-    [JsonIgnore]
-    public Message? RepliedMessage { get; set; }
+    [Required]
+    public DefaultUser? User { get; set; }
 
     public int? ChatId { get; set; }
 

@@ -10,8 +10,8 @@ public class PermittedMediaType
     [Required]
     public string Type { get; set; }
 
-    [Required]
-    public ICollection<MediaExtension>? PermittedExtensions { get; set; }
+    [JsonIgnore]
+    public ICollection<MediaExtension>? MediaExtensions { get; set; }
 
     /*
     [JsonIgnore]

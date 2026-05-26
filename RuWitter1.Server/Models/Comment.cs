@@ -5,6 +5,11 @@ namespace RuWitter1.Server.Models;
 
 public class Comment : MediaPublication
 {
+    [Required]
+    public string UserId { get; set; }
+
+    [Required]
+    public DefaultUser? User { get; set; }
 
     public int PostId { get; set; }
 
@@ -12,10 +17,10 @@ public class Comment : MediaPublication
     [JsonIgnore]
     public Post? Post {  get; set; }
 
-    public int? RepliedCommentId { get; set; }
+    [JsonIgnore]
+    public ICollection<PostsLikes>? PostsLikes { get; set; }
+
 
     [JsonIgnore]
-    public Comment? RepliedComment { get; set; }
-
-
+    public ICollection<CommunityPostsLikes>? CommunityPostsLikes { get; set; }
 }

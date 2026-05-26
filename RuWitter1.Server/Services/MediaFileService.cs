@@ -145,6 +145,10 @@ public class MediaFileService : IMediaFileInterface
             await formFile.CopyToAsync(memoryStream);
             mediaFile.Data = memoryStream.ToArray();
 
+            await _context.MediaFiles.AddAsync(mediaFile);
+            await _context.SaveChangesAsync();
+            Console.WriteLine("Ok");
+
             return mediaFile;
         }
         catch (Exception ex)

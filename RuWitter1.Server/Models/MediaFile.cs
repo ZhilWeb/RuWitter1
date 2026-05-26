@@ -27,14 +27,17 @@ public class MediaFile
     public DateTime UploadDate { get; set; } = DateTime.UtcNow;
 
     [JsonIgnore]
-    public ICollection<DefaultUser>? Users { get; set; }
+    public DefaultUser? User { get; set; }
 
     [JsonIgnore]
-    public ICollection<Post>? Posts { get; set; }
+    public Post? Posts { get; set; }
 
     [JsonIgnore]
-    public ICollection<Comment>? Comments { get; set; }
+    public Comment? Comments { get; set; }
 
     [JsonIgnore]
-    public ICollection<Message>? Messages { get; set; }
+    public Message? Messages { get; set; }
+
+    [JsonIgnore]
+    public Community? Communities { get; set; }
 }

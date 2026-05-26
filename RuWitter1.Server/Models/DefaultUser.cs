@@ -39,4 +39,10 @@ public class DefaultUser : IdentityUser
     [JsonIgnore]
     [PersonalData]
     public List<Chat> Chats { get; set; } = new List<Chat>();
+
+    [PersonalData]
+    public ICollection<Community>? Communities { get; set; }
+
+    [PersonalData]
+    public ICollection<PostsLikes>? PostsLikes { get; set; }
 }
