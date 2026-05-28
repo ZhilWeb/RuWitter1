@@ -18,4 +18,6 @@ public interface IPostInterface
     Task<int> SetLikeByCommunity(string userId, int communityId, int postId);
 
     Task<IEnumerable<Post>?> GetPostsByNewsFeed(string userId);
+
+    Task<bool> DeletePostWatches(string userId);
 }

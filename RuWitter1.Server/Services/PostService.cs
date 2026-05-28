@@ -203,6 +203,27 @@ public class PostService : IPostInterface
             .Include(p => p.MediaFiles)
             .Where(p => recommendations.Contains(p.Id))
             .ToListAsync();
+
+
+        // записываем записи как просмотренные
+        List<CommunityPostWatches> communityPostWatches = new List<CommunityPostWatches>();
+        foreach (var post in posts)
+        {
+            if (post.CommunityId != null) 
+            {
+                CommunityPostWatches communityPostWatch = new CommunityPostWatches
+                {
+                    DefaultUserId = userId,
+                    CommunityId = (int)post.CommunityId,
+                    PostId = post.Id,
+                };
+                communityPostWatches.Add(communityPostWatch);
+            }
+            
+        }
+        await _context.CommunityPostWatches.AddRangeAsync(communityPostWatches);
+        await _context.SaveChangesAsync();
+
         return posts
             .OrderBy(p => sortRecommendations[p.Id])
             .ToList();
@@ -268,5 +289,21 @@ public class PostService : IPostInterface
         await _context.CommunityPostsLikes.AddAsync(like);
         await _context.SaveChangesAsync();
         return postId;
+    }
+
+    public async Task<bool> DeletePostWatches(string userId) 
+    {
+        List<CommunityPostWatches> communityPostWatches = await _context.CommunityPostWatches
+            .Where(w => w.DefaultUserId == userId)
+            .ToListAsync();
+
+        if(communityPostWatches.Count == 0) 
+        {
+            return false;
+        }
+
+        _context.CommunityPostWatches.RemoveRange(communityPostWatches);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

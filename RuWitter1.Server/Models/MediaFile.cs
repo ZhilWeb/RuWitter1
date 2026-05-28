@@ -14,7 +14,7 @@ public class MediaFile
     [Required]
     public string ContentType { get; set; }
 
-    [JsonIgnore]
+
     public int ExtensionId { get; set; }
 
     [Required]

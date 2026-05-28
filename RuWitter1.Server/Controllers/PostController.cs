@@ -130,5 +130,25 @@ namespace RuWitter1.Server.Controllers
             return await _postService.GetPostsByNewsFeed(userId);
         }
 
+        // Delete: api/<PostController>/postwatches
+        [HttpDelete("postwatches")]
+        public async Task<IActionResult> DeletePostWatches() 
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            bool deletePostWatchesResult = await _postService.DeletePostWatches(userId);
+            if (!deletePostWatchesResult) 
+            {
+                return NotFound("Данные о просмотрах записей сообществ не найдены.");
+            }
+
+            return Ok("Данные о просмотрах записей сообществ удалены.");
+        }
+
     }
 }

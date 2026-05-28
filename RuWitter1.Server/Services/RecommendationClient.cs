@@ -17,13 +17,15 @@ namespace RuWitter1.Server.Services
         }
 
         public async Task<List<int>> GetPostReccomends(List<int> communityPostsLikesIds,
-            List<int> communityPostWatchesIds, List<string> postTexts, CancellationToken token = default)
+            List<int> communityPostWatchesIds, List<string> postTexts, int feedSize = 10, CancellationToken token = default)
         {
             var payload = JsonSerializer.Serialize(
                         new
                         {
                             likedIndices = communityPostsLikesIds,
-                            likedTexts = postTexts
+                            likedTexts = postTexts,
+                            watchedIndices = communityPostWatchesIds,
+                            feedSize = feedSize
                         }
                     );
 
