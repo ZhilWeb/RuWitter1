@@ -26,7 +26,7 @@ public class CommentService : ICommentInterface
             throw new Exception("Body has invalid.");
         }
 
-        Post? existingPost = await _postService.GetPostById(postId);
+        Post? existingPost = _postService.GetPostById(postId);
 
         if (existingPost == null) 
         {
@@ -85,7 +85,7 @@ public class CommentService : ICommentInterface
             throw new Exception("Body has invalid.");
         }
 
-        Post? existingPost = await _postService.GetPostById(postId);
+        Post? existingPost = _postService.GetPostById(postId);
 
         if (existingPost == null)
         {
@@ -153,7 +153,7 @@ public class CommentService : ICommentInterface
 
     public async Task<IEnumerable<Comment>?> GetAllOfPost(int postId)
     {
-        Post? existingPost = await _postService.GetPostById(postId);
+        Post? existingPost = _postService.GetPostById(postId);
 
         if (existingPost == null)
         {

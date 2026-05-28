@@ -9,6 +9,12 @@ namespace RuWitter1.Server.Models
         public int Id { get; set; }
 
         [Required]
+        public string DefaultUserId { get; set; }
+
+        [JsonIgnore]
+        public DefaultUser? DefaultUser { get; set; }
+
+        [Required]
         public int CommunityId { get; set; }
 
         [JsonIgnore]

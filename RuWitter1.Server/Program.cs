@@ -1,9 +1,10 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using RuWitter1.Server.Models;
+using RuWitter1.Server.Services;
 using Swashbuckle.AspNetCore.Filters;
+using System.Security.Claims;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +41,9 @@ builder.Services.AddDbContextPool<PostContext>(opt =>
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<DefaultUser>()
     .AddEntityFrameworkStores<PostContext>();
+builder.Services.AddHttpClient();
+builder.Services.AddHostedService<RebuildWorker>();
+builder.Services.AddHttpClient<RecommendationClient>();
 
 var app = builder.Build();
 
@@ -75,5 +79,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
+
+await DbInitializer.SeedDataAsync(app.Services);
 
 app.Run();

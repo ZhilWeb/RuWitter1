@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RuWitter1.Server.Interfaces;
 using RuWitter1.Server.Models;
 
@@ -48,9 +49,12 @@ namespace RuWitter1.Server.Services
             throw new NotImplementedException();
         }
 
-        public Task<Community?> GetCommunityById(int communityId)
+        public Community? GetCommunityById(int? communityId)
         {
-            throw new NotImplementedException();
+            return _context.Communities
+                .Include(c => c.Avatar)
+                .AsNoTracking()
+                .FirstOrDefault(c => c.Id == communityId);
         }
 
         public Task UpdateCommunity(Community community)

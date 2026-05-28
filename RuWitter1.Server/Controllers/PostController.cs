@@ -16,11 +16,13 @@ namespace RuWitter1.Server.Controllers
     {
         private readonly IPostInterface _postService;
         private readonly UserManager<DefaultUser> _userManager;
+        private readonly ICommunityInterface _communityService;
 
-        public PostController(IPostInterface postService, UserManager<DefaultUser> userManager)
+        public PostController(IPostInterface postService, UserManager<DefaultUser> userManager, ICommunityInterface communityService)
         {
             _postService = postService;
             _userManager = userManager;
+            _communityService = communityService;
         }
 
         // GET: api/<PostController>/count
@@ -39,9 +41,9 @@ namespace RuWitter1.Server.Controllers
 
         // GET api/<PostController>/post/5
         [HttpGet("post/{id}")]
-        public async Task<Post?> GetById(int id)
+        public Post? GetById(int id)
         {
-            return await _postService.GetPostById(id);
+            return _postService.GetPostById(id);
         }
 
         // POST api/<PostController>
@@ -59,6 +61,22 @@ namespace RuWitter1.Server.Controllers
             return Ok(userId);
         }
 
+        // POST api/<PostController>/community/2
+        [HttpPost("/community/{communityId}")]
+        public async Task<IActionResult> PostByCommunity([FromForm] string body, int communityId, List<IFormFile> formFiles)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var community = _communityService.GetCommunityById(communityId);
+
+            if (string.IsNullOrEmpty(userId) || community == null || community.Id == 0 || userId != community.DefaultUserId)
+            {
+                return Unauthorized();
+            }
+
+            await _postService.CreatePostByCommunity(userId, communityId, body, formFiles);
+            return Ok(communityId);
+        }
+
         // PUT api/<PostController>/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
@@ -70,5 +88,47 @@ namespace RuWitter1.Server.Controllers
         public void Delete(int id)
         {
         }
+
+
+        // POST api/<PostController>/community/2/post/4
+        [HttpPost("/community/post/{postId}")]
+        public async Task<IActionResult> LikeByCommunity(int postId) 
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            Post? post = _postService.GetPostById(postId);
+            if(post == null || post.CommunityId == 0) 
+            {
+                return NotFound();
+            }
+            Community? community = _communityService.GetCommunityById(post.CommunityId);
+            if(community == null || community.Id == 0) 
+            {
+                return NotFound();
+            }
+            
+
+            int resultPostId = await _postService.SetLikeByCommunity(userId, community.Id, postId);
+            return Ok(resultPostId);
+        }
+
+        // GET: api/<PostController>
+        [HttpGet]
+        public async Task<IEnumerable<Post>?> GetPostsFeed() 
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return [];
+            }
+
+            return await _postService.GetPostsByNewsFeed(userId);
+        }
+
     }
 }

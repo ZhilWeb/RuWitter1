@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RuWitter1.Server.Models;
@@ -11,9 +12,11 @@ using RuWitter1.Server.Models;
 namespace RuWitter1.Server.Migrations
 {
     [DbContext(typeof(PostContext))]
-    partial class PostContextModelSnapshot : ModelSnapshot
+    [Migration("20260526153634_UniqueCommunityCategory")]
+    partial class UniqueCommunityCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -323,18 +326,12 @@ namespace RuWitter1.Server.Migrations
                     b.Property<int>("CommunityId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("DefaultUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("PostId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CommunityId");
-
-                    b.HasIndex("DefaultUserId");
 
                     b.HasIndex("PostId");
 
@@ -349,15 +346,11 @@ namespace RuWitter1.Server.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CommentId")
+                    b.Property<int>("CommentId")
                         .HasColumnType("integer");
 
                     b.Property<int>("CommunityId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("DefaultUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int>("PostId")
                         .HasColumnType("integer");
@@ -367,8 +360,6 @@ namespace RuWitter1.Server.Migrations
                     b.HasIndex("CommentId");
 
                     b.HasIndex("CommunityId");
-
-                    b.HasIndex("DefaultUserId");
 
                     b.HasIndex("PostId");
 
@@ -619,6 +610,7 @@ namespace RuWitter1.Server.Migrations
                         .HasColumnType("character varying(10000)");
 
                     b.Property<int?>("CommunityId")
+                        .IsRequired()
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("PublicDate")
@@ -645,11 +637,13 @@ namespace RuWitter1.Server.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CommentId")
+                    b.Property<int>("CommentId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("DefaultUserId")
-                        .IsRequired()
+                    b.Property<int>("DefaultUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DefaultUserId1")
                         .HasColumnType("text");
 
                     b.Property<int>("PostId")
@@ -659,7 +653,7 @@ namespace RuWitter1.Server.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.HasIndex("DefaultUserId");
+                    b.HasIndex("DefaultUserId1");
 
                     b.HasIndex("PostId");
 
@@ -784,12 +778,6 @@ namespace RuWitter1.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RuWitter1.Server.Models.DefaultUser", "DefaultUser")
-                        .WithMany()
-                        .HasForeignKey("DefaultUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("RuWitter1.Server.Models.Post", "Post")
                         .WithMany("CommunityPostWatches")
                         .HasForeignKey("PostId")
@@ -798,8 +786,6 @@ namespace RuWitter1.Server.Migrations
 
                     b.Navigation("Community");
 
-                    b.Navigation("DefaultUser");
-
                     b.Navigation("Post");
                 });
 
@@ -807,17 +793,13 @@ namespace RuWitter1.Server.Migrations
                 {
                     b.HasOne("RuWitter1.Server.Models.Comment", "Comment")
                         .WithMany("CommunityPostsLikes")
-                        .HasForeignKey("CommentId");
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("RuWitter1.Server.Models.Community", "Community")
                         .WithMany("CommunityPostsLikes")
                         .HasForeignKey("CommunityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RuWitter1.Server.Models.DefaultUser", "DefaultUser")
-                        .WithMany()
-                        .HasForeignKey("DefaultUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -830,8 +812,6 @@ namespace RuWitter1.Server.Migrations
                     b.Navigation("Comment");
 
                     b.Navigation("Community");
-
-                    b.Navigation("DefaultUser");
 
                     b.Navigation("Post");
                 });
@@ -908,7 +888,9 @@ namespace RuWitter1.Server.Migrations
                 {
                     b.HasOne("RuWitter1.Server.Models.Community", "Community")
                         .WithMany()
-                        .HasForeignKey("CommunityId");
+                        .HasForeignKey("CommunityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("RuWitter1.Server.Models.DefaultUser", "User")
                         .WithMany("Posts")
@@ -925,13 +907,13 @@ namespace RuWitter1.Server.Migrations
                 {
                     b.HasOne("RuWitter1.Server.Models.Comment", "Comment")
                         .WithMany("PostsLikes")
-                        .HasForeignKey("CommentId");
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("RuWitter1.Server.Models.DefaultUser", "DefaultUser")
                         .WithMany("PostsLikes")
-                        .HasForeignKey("DefaultUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DefaultUserId1");
 
                     b.HasOne("RuWitter1.Server.Models.Post", "Post")
                         .WithMany("PostsLikes")

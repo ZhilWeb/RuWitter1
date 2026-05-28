@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RuWitter1.Server.Models;
@@ -11,9 +12,11 @@ using RuWitter1.Server.Models;
 namespace RuWitter1.Server.Migrations
 {
     [DbContext(typeof(PostContext))]
-    partial class PostContextModelSnapshot : ModelSnapshot
+    [Migration("20260527155041_CommunityPostsLikesUser")]
+    partial class CommunityPostsLikesUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -323,18 +326,12 @@ namespace RuWitter1.Server.Migrations
                     b.Property<int>("CommunityId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("DefaultUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("PostId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CommunityId");
-
-                    b.HasIndex("DefaultUserId");
 
                     b.HasIndex("PostId");
 
@@ -784,12 +781,6 @@ namespace RuWitter1.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RuWitter1.Server.Models.DefaultUser", "DefaultUser")
-                        .WithMany()
-                        .HasForeignKey("DefaultUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("RuWitter1.Server.Models.Post", "Post")
                         .WithMany("CommunityPostWatches")
                         .HasForeignKey("PostId")
@@ -797,8 +788,6 @@ namespace RuWitter1.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("Community");
-
-                    b.Navigation("DefaultUser");
 
                     b.Navigation("Post");
                 });

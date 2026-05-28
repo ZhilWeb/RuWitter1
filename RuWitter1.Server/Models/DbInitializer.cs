@@ -2,6 +2,7 @@
 using RuWitter1.Server.Services;
 using System;
 using System.IO;
+using System.Text;
 
 
 namespace RuWitter1.Server.Models
@@ -15,7 +16,7 @@ namespace RuWitter1.Server.Models
             "Политика",
             "Общество",
             "Культура",
-            "Наука_техника",
+            "Наука и техника",
             "Происшествия",
             "Экономика",
         };
@@ -63,6 +64,11 @@ namespace RuWitter1.Server.Models
                 categoryIds.Add(categories.IndexOf(communitiesCategories[i]) + 1);
             }
 
+            foreach (var categoryName in categories) 
+            {
+                Console.WriteLine(categoryName);
+            }
+
             var imageMediaExtensions = await context.MediaExtensions
                 .Where(m => m.PermittedMediaType != null && m.PermittedMediaType.Type == "Image")
                 .Select(m => m.Name)
@@ -79,7 +85,9 @@ namespace RuWitter1.Server.Models
             // Укажите ваш реальный путь. Буква '@' позволяет использовать обычные слэши.
             string communityFolderPath = @"C:\Users\RTK1\Pictures\Диплом\Сообщества";
 
-            if (Directory.Exists(communityFolderPath) && !await context.MediaFiles.AnyAsync())
+            var communities = new List<Community>();
+            int currentRandomUserId = 1;
+            if (Directory.Exists(communityFolderPath) && !await context.MediaFiles.AnyAsync() && !await context.Communities.AnyAsync())
             {
                 foreach (string category in communitiesCategories)
                 {
@@ -119,156 +127,168 @@ namespace RuWitter1.Server.Models
                             await context.SaveChangesAsync();
                         }
 
+                        for(int i = 0; i < 3; i++) 
+                        {
+                            int? avatarId = mediaFilesToSeed.Any() ? mediaFilesToSeed[i % mediaFilesToSeed.Count].Id : null;
+                            int categoryIndex = communitiesCategories.IndexOf(category);
+                            int? categoryId = categoryIds[categoryIndex];
+                            communities.Add(new Community
+                            {
+                                Name = nameBriefCommunities[i + categoryIndex * 3]["name"],
+                                DefaultUserId = userIds[currentRandomUserId % userIds.Count],
+                                CommunityCategoryId = categoryId,
+                                AvatarId = avatarId,
+                                BriefInformation = nameBriefCommunities[i + categoryIndex * 3]["brief"]
+                            });
+                            Console.WriteLine(userIds[currentRandomUserId % userIds.Count]);
+                            currentRandomUserId++;
+                        }
+
                     }
+                }
+
+                if (communities.Any())
+                {
+                    await context.Communities.AddRangeAsync(communities);
+                    await context.SaveChangesAsync();
                 }
 
             }
 
             // 3. Проверяем, нужно ли генерировать сообщества
-            if (await context.Communities.AnyAsync())
-            {
-                return;
-            }
+            //if (await context.Communities.AnyAsync())
+            //{
+            //    return;
+            //}
 
-            // Получаем свежий список ID сохраненных картинок
-            var avatarIds = await context.MediaFiles.Select(m => m.Id).ToListAsync();
-            var communities = new List<Community>();
+            
 
 
 
             // Генерируем 21 сообщество
-            for (int i = 0; i < 21; i++)
-            {
-                string randomUserId = userIds[i % userIds.Count];
-                int randomCategoryId = categoryIds[i % categoryIds.Count];
+            
+            //foreach(int categoryId in categoryIds)
+            //{
+            //    string randomUserId = userIds[currentUserId % userIds.Count];
 
-                // Если картинки нашлись и успешно добавились — берем ID, иначе — null
-                int? randomAvatarId = avatarIds.Any() ? avatarIds[i % avatarIds.Count] : null;
+            //    communities.Add(new Community
+            //    {
+            //        Name = nameBriefCommunities[i]["name"],
+            //        DefaultUserId = randomUserId,
+            //        CommunityCategoryId = categoryId,
+            //        AvatarId = randomAvatarId,
+            //        BriefInformation = nameBriefCommunities[i]["brief"]
+            //    });
+            //}
+            //communities.Shuffle();
 
-                communities.Add(new Community
-                {
-                    Name = nameBriefCommunities[i]["name"],
-                    DefaultUserId = randomUserId,
-                    CommunityCategoryId = randomCategoryId,
-                    AvatarId = randomAvatarId,
-                    BriefInformation = nameBriefCommunities[i]["brief"]
-                });
-            }
-            communities.Shuffle();
-
-            await context.Communities.AddRangeAsync(communities);
-            await context.SaveChangesAsync();
+            
 
 
             // Генерируем записи
             // 5. Инициализация MediaFiles для ПОСТОВ (сохраняем их в базу первыми)
             string postImagesFolderPath = @"C:\Users\RTK1\Pictures\Диплом\Записи";
             var postMediaFilesPool = new List<MediaFile>();
-
-            if (Directory.Exists(postImagesFolderPath))
+            string csvFilePath = @"F:\MyFiles\lenta-ru-news-recommend-data700.csv";
+            int textCountByCategory = 100;
+            List<string> usedPostFiles = new List<string>();
+            Console.OutputEncoding = Encoding.UTF8;
+            if (File.Exists(csvFilePath) && !await context.Posts.AnyAsync())
             {
-
-                foreach (string category in communitiesCategories)
+                var postsToSeed = new List<Post>();
+                var csvLines = await File.ReadAllLinesAsync(csvFilePath, Encoding.UTF8);
+                var rnd = new Random();
+                foreach (string category in categories) 
                 {
-                    // Фильтруем файлы по популярным расширениям изображений
-                    var postFiles = Directory.GetFiles(Path.Combine(postImagesFolderPath, category))
-                        .Where(file => imageMediaExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()))
-                        .ToList();
+                    // Выгружаем только что созданные сообщества по текущей категории
+                    var allCommunities = await context.Communities
+                        .Where(c => c.CommunityCategory != null && c.CommunityCategory.Name == category)
+                        .OrderBy(c => c.Id)
+                        .ToListAsync();
 
-                    if (postFiles.Any())
+                    Console.WriteLine(category);
+                    foreach(var community in allCommunities) 
                     {
-
-
-                        var mediaFilesToSeed = new List<MediaFile>();
-                        foreach (var filePath in postFiles)
-                        {
-                            var fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
-                            byte[] fileData = await File.ReadAllBytesAsync(filePath);
-                            string imageFileContentType = GetContentType(fileExtension);
-                            if (string.IsNullOrEmpty(fileExtension) || !imageMediaExtensions.Exists(n => n == fileExtension)) continue;
-                            MediaExtension? dbfileExtension = await context.MediaExtensions.AsNoTracking().SingleOrDefaultAsync(p => p.Name == fileExtension);
-                            if (dbfileExtension == null) continue;
-
-                            postMediaFilesPool.Add(new MediaFile
-                            {
-                                Name = Guid.NewGuid(),
-                                ContentType = imageFileContentType,
-                                ExtensionId = dbfileExtension.Id,
-                                Data = fileData,
-                                UploadDate = DateTime.UtcNow,
-                            });
-                        }
-
-                        if (postMediaFilesPool.Any())
-                        {
-                            await context.MediaFiles.AddRangeAsync(postMediaFilesPool);
-                            // Сохраняем файлы сейчас, чтобы база данных сгенерировала для них Id
-                            await context.SaveChangesAsync();
-                        }
-
+                        Console.WriteLine(community.Id);
                     }
-                }
-            }
+                    
+                    
 
-            // 6. Инициализация ПОСТОВ из CSV и привязка к ним картинок по 1-2 штуки
-            string csvFilePath = @"F:\MyFiles\lenta-ru-news-recommend-data1.csv";
+                    // Чтобы картинки не перемешивались между категориями, сгруппируем посты по категориям.
+                    // Для простоты — будем распределять строки из CSV по кругу, но картинки брать строго из папки нужной категории.
+                    int postBeginIndex = categories.IndexOf(category) * textCountByCategory;
+                    Console.WriteLine(postBeginIndex);
+                    Console.WriteLine(postBeginIndex + textCountByCategory);
 
-            if (File.Exists(csvFilePath) && !await context.Set<Post>().AnyAsync())
-            {
-                var generatedCommunities = await context.Communities
-                    .Select(c => new { c.Id, c.DefaultUserId })
-                    .ToListAsync();
-
-                if (generatedCommunities.Any())
-                {
-                    var postsToSeed = new List<Post>();
-                    var csvLines = await File.ReadAllLinesAsync(csvFilePath);
-
-                    var rnd = new Random();
-                    int currentFileIndex = 0; // Индекс для отслеживания остатка картинок в пуле
-                    int postIndex = 0;
-
-                    foreach (var line in csvLines)
+                    for(int i = postBeginIndex; i < postBeginIndex + textCountByCategory && i < csvLines.Length; i++)
                     {
-                        string bodyText = line.Trim('"', ' ', '\t', '\r', '\n');
+                        Console.WriteLine(i);
+                        string bodyText = csvLines[i].Trim('"', ' ', '\t', '\r', '\n');
                         if (string.IsNullOrWhiteSpace(bodyText)) continue;
 
-                        var targetCommunity = generatedCommunities[postIndex % generatedCommunities.Count];
+                        // Берем текущее сообщество из базы
+                        var targetCommunity = allCommunities[i % allCommunities.Count];
 
-                        // Создаем пост
                         var newPost = new Post
                         {
                             Body = bodyText.Length > 10000 ? bodyText.Substring(0, 10000) : bodyText,
                             PublicDate = DateTime.UtcNow,
                             CommunityId = targetCommunity.Id,
                             UserId = targetCommunity.DefaultUserId,
-                            MediaFiles = new List<MediaFile>() // Инициализируем коллекцию для картинок
+                            MediaFiles = new List<MediaFile>()
                         };
+                        //newPost.Body = newPost.Body.Replace("\0", "");
 
-                        // Если картинки в пуле еще остались, прикрепляем 1 или 2 штуки
-                        if (currentFileIndex < postMediaFilesPool.Count)
+                        // Ищем папку с картинками постов для данной категории
+                        string specificPostImagesPath = Path.Combine(postImagesFolderPath, category);
+
+                        if (Directory.Exists(specificPostImagesPath))
                         {
-                            // Случайно выбираем количество: 1 или 2 (но не больше, чем осталось в пуле)
-                            int imagesToAttach = rnd.Next(1, 3);
-                            int remainingImages = postMediaFilesPool.Count - currentFileIndex;
-                            int finalCount = Math.Min(imagesToAttach, remainingImages);
+                            var availableImages = Directory.GetFiles(specificPostImagesPath)
+                                .Where(file => imageMediaExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()))
+                                .Where(file => !usedPostFiles.Contains(Path.GetFullPath(file)))
+                                .ToList();
 
-                            for (int j = 0; j < finalCount; j++)
+                            if (availableImages.Any())
                             {
-                                newPost.MediaFiles.Add(postMediaFilesPool[currentFileIndex]);
-                                currentFileIndex++; // Сдвигаем указатель, так как картинка "потрачена"
+                                // Выбираем случайную 1 или 2 картинки из папки этой категории
+                                int imagesCountToAttach = rnd.Next(1, 3);
+
+                                for (int j = 0; j < imagesCountToAttach; j++)
+                                {
+                                    // Случайно выбираем файл из доступных в этой папке
+                                    string randomImagePath = availableImages[rnd.Next(availableImages.Count)];
+                                    var fileExtension = Path.GetExtension(randomImagePath).ToLowerInvariant();
+                                    MediaExtension? dbfileExtension = await context.MediaExtensions.AsNoTracking().SingleOrDefaultAsync(p => p.Name == fileExtension);
+
+                                    if (dbfileExtension != null)
+                                    {
+                                        var postMediaFile = new MediaFile
+                                        {
+                                            Name = Guid.NewGuid(),
+                                            ContentType = GetContentType(Path.GetExtension(fileExtension)),
+                                            ExtensionId = dbfileExtension.Id,
+                                            Data = await File.ReadAllBytesAsync(randomImagePath),
+                                            UploadDate = DateTime.UtcNow
+                                        };
+
+                                        // Добавляем в коллекцию поста. EF Core сам сохранит медиафайл при сохранении поста!
+                                        newPost.MediaFiles.Add(postMediaFile);
+                                        usedPostFiles.Add(Path.GetFullPath(randomImagePath));
+                                    }
+                                }
                             }
                         }
 
                         postsToSeed.Add(newPost);
-                        postIndex++;
                     }
+                }
+                
 
-                    if (postsToSeed.Any())
-                    {
-                        await context.Set<Post>().AddRangeAsync(postsToSeed);
-                        await context.SaveChangesAsync();
-                    }
+                if (postsToSeed.Any())
+                {
+                    await context.Posts.AddRangeAsync(postsToSeed);
+                    await context.SaveChangesAsync(); // Сохраняются и посты, и вложенные MediaFiles
                 }
             }
         }

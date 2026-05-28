@@ -39,6 +39,10 @@ public class PostContext : IdentityDbContext<DefaultUser>
             new PermittedMediaType { Id = 2, Type = "Text" }  
         );
 
+        builder.Entity<CommunityCategory>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
+
         builder.Entity<CommunityCategory>().HasData(
             new CommunityCategory { Id = 1, Name = "Политика"},  
             new CommunityCategory { Id = 2, Name = "Общество"},  
