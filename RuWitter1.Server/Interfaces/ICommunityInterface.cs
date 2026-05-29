@@ -10,5 +10,8 @@ namespace RuWitter1.Server.Interfaces
         Community? GetCommunityById(int? communityId);
         Task<string> CreateCommunity(string existingUserId, string name, IFormFile avatar, string briefInformation, int categoryId);
         Task UpdateCommunity(Community community);
+
+        Task<IEnumerable<Community>> GetCommunityBySearch(string name,
+            List<int> communityCategoryIds, string briefInformationSubstring, string managerName);
     }
 }

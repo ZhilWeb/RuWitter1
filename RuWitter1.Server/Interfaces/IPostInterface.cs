@@ -13,11 +13,18 @@ public interface IPostInterface
 
     Task CreatePostByCommunity(string existingUserId, int communityId, string body, List<IFormFile> files);
 
-    Task<int> SetLike(string userId, int postId);
+    Task<int> SetLike(string userId, int postId, int? commentId);
 
-    Task<int> SetLikeByCommunity(string userId, int communityId, int postId);
+    Task<int> SetLikeByCommunity(string userId, int communityId, int postId, int? commentId);
+
+    Task<bool> DeleteLike(string userId, int postId, int? commentId = null);
+
+    Task<bool> DeleteLikeByCommunity(string userId, int communityId, int postId, int? commentId = null);
 
     Task<IEnumerable<Post>?> GetPostsByNewsFeed(string userId);
 
     Task<bool> DeletePostWatches(string userId);
+
+    Task<IEnumerable<Post>?> GetPostsBySearch(string userId, string postSubString,
+        string communityNameSubString, List<int> communityCategoryIds, DateTime dateTimeFrom, DateTime dateTimeTo);
 }

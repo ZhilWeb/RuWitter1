@@ -29,6 +29,22 @@ namespace RuWitter1.Server.Controllers
             return Ok(users);
         }
 
+        // GET: api/<DefaultUserController>/users-search
+        [HttpGet("users-search")]
+        public async Task<IEnumerable<DefaultUserPersonalDataUpdate>> GetAllUsersBySearch([FromForm] string phoneNumber = "",
+            [FromForm] string nickname = "", [FromForm] int ageFrom = 1, 
+            [FromForm] int ageTo = 100, [FromForm] string city = "", [FromForm] string interests = "") 
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return [];
+            }
+
+            return await _defaultUserService.GetAllUsersAsyncBySearch(userId, phoneNumber, nickname, ageFrom, ageTo, city, interests);
+        }
+
         /*
         // GET api/<DefaultUserController>/5
         [HttpGet("{username}")]
@@ -70,7 +86,7 @@ namespace RuWitter1.Server.Controllers
                     BriefInformation = user.BriefInformation,
                     City = user.City,
                     Interests = user.Interests,
-                    AvatarId = user.AvatarId,
+                    Avatar = user.Avatar,
                 };
 
                 return Ok(personalData);
@@ -88,10 +104,12 @@ namespace RuWitter1.Server.Controllers
 
             if (string.IsNullOrEmpty(userId))
             {
-                throw new Exception("Unauthorized");
+                return Unauthorized();
             }
 
-            return Ok(userId);
+            DefaultUser? user = await _defaultUserService.GetUserByIdAsync(userId);
+
+            return Ok(user);
         }
 
 

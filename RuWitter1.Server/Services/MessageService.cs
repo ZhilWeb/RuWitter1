@@ -22,13 +22,13 @@ public class MessageService : IMessageInterface
     {
         if (body == null)
         {
-            throw new Exception("Body has invalid.");
+            return ;
         }
 
         Chat? existingChat = _chatService.GetChatById(chatId);
         if (existingChat == null)
         {
-            throw new Exception("Chat has not found.");
+            return ;
         }
 
 
@@ -87,12 +87,33 @@ public class MessageService : IMessageInterface
 
         if (existingChat == null)
         {
-            throw new Exception("Chat has not found.");
+            return [];
         }
 
         return await _context.Messages
             .Include(m => m.MediaFiles)
             .Where(m => m.ChatId == existingChat.Id)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Message>?> GetAllMessageByChatSearch(int chatId, string bodySubStr)
+    {
+        if(bodySubStr == null) 
+        {
+            bodySubStr = "";
+        }
+
+        Chat? existingChat = _chatService.GetChatById(chatId);
+
+        if (existingChat == null)
+        {
+            return [];
+        }
+
+        return await _context.Messages
+            .Include(m => m.MediaFiles)
+            .Where(m => m.ChatId == existingChat.Id && m.Body.Contains(bodySubStr))
             .AsNoTracking()
             .ToListAsync();
     }
@@ -108,4 +129,7 @@ public class MessageService : IMessageInterface
     {
         throw new NotImplementedException();
     }
+
+
+    
 }

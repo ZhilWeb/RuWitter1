@@ -9,4 +9,6 @@ public interface IMessageInterface
     Task CreateMessage(DefaultUser hostUser, int chatId, string body, List<IFormFile> files);
     Task UpdateChat(Chat chat);
     Task DeleteChat(string userId, int chatId);
+
+    Task<IEnumerable<Message>?> GetAllMessageByChatSearch(int chatId, string bodySubStr);
 }

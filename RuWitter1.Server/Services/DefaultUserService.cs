@@ -28,6 +28,45 @@ public class DefaultUserService : IDefaultUserInterface
         return _userManager.Users.ToList();
     }
 
+    public async Task<IEnumerable<DefaultUserPersonalDataUpdate>> GetAllUsersAsyncBySearch(string userId, string phoneNumber, string nickname, int ageFrom, int ageTo, string city, string interests)
+    {
+        if (phoneNumber == null) phoneNumber = "";
+        if (nickname == null) nickname = "";
+        if (ageFrom == default) ageFrom = 1;
+        if (ageTo == default) ageTo = 100;
+        if (city == null) city = "";
+        if (interests == null) interests = "";
+
+        List<DefaultUser> users = _userManager.Users
+            .Where(u => u.PhoneNumber != null && u.PhoneNumber.Contains(phoneNumber))
+            .Where(u => u.Nickname.Contains(nickname))
+            .Where(u => u.Age >= ageFrom && u.Age < ageTo)
+            .Where(u => u.City.Contains(city))
+            .Where(u => u.Interests.Contains(interests))
+            .Where(u => u.Id != userId)
+            .ToList();
+
+        List<DefaultUserPersonalDataUpdate> usersPersonalData = new List<DefaultUserPersonalDataUpdate>();
+        foreach (var user in users) 
+        {
+            string phoneNumberPersonalData = user.PhoneNumber == null ? "" : user.PhoneNumber;
+
+            DefaultUserPersonalDataUpdate personalData = new DefaultUserPersonalDataUpdate
+            {
+                Avatar = user.Avatar,
+                UserId = user.Id,
+                PhoneNumber = phoneNumberPersonalData,
+                Nickname = user.Nickname,
+                Age = user.Age,
+                BriefInformation = user.BriefInformation,
+                City = user.City,
+                Interests = user.Interests
+            };
+            usersPersonalData.Add(personalData);
+        }
+        return usersPersonalData;
+    }
+
     public async Task<IdentityResult> UpdateUserAsync(DefaultUser user)
     {
         return await _userManager.UpdateAsync(user);
@@ -42,9 +81,9 @@ public class DefaultUserService : IDefaultUserInterface
         return await _userManager.DeleteAsync(user);
     }
 
-    public async Task<DefaultUser?> GetUserByIdAsync(string id)
+    public async Task<DefaultUser?> GetUserByIdAsync(string userId)
     {
-        return await _userManager.FindByIdAsync(id);
+        return await _userManager.FindByIdAsync(userId);
     }
 
     public async Task<IdentityResult> UpdatePersonalDataAsync(DefaultUserPersonalDataUpdate updatedUserData)

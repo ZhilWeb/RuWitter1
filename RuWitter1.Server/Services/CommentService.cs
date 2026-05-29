@@ -23,14 +23,14 @@ public class CommentService : ICommentInterface
     {
         if (body == null)
         {
-            throw new Exception("Body has invalid.");
+            return ;
         }
 
         Post? existingPost = _postService.GetPostById(postId);
 
         if (existingPost == null) 
         {
-            throw new Exception("Post has not found.");
+            return;
         }
 
 
@@ -168,9 +168,16 @@ public class CommentService : ICommentInterface
             .ToListAsync();
     }
 
-    public Task<Post?> GetCommentById(int commentId)
+    public async Task<Comment?> GetCommentById(int postId, int commentId)
     {
-        throw new NotImplementedException();
+        Post? existingPost = _postService.GetPostById(postId);
+        if (existingPost == null) 
+        {
+            return null;
+        }
+
+        return await _context.Comments
+            .FirstOrDefaultAsync(c => c.Id == commentId && c.PostId == postId);
     }
 
     public Task UpdateComment(Comment comment)

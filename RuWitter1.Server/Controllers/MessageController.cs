@@ -67,6 +67,20 @@ namespace RuWitter1.Server.Controllers
             return messages;
         }
 
+        // GET: api/<MessageController>/1/search
+        [HttpGet("{chatId}/search")]
+        public async Task<IEnumerable<Message>?> GetAllMessageByChatSearch(int chatId, string bodySubStr) 
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return [];
+            }
+
+            return await _messageService.GetAllMessageByChatSearch(chatId, bodySubStr);
+        }
+
         // GET api/<MessageController>/1/5
         [HttpGet("{chatId}/{messageId}")]
         public string Get(int chatId, int messageId)

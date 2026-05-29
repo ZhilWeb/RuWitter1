@@ -5,8 +5,10 @@ namespace RuWitter1.Server.Models;
 
 public class DefaultUserPersonalDataUpdate
 {
-    public int? AvatarId { get; set; }
+    public MediaFile? Avatar { get; set; }
     public required string UserId { get; set; }
+
+    public string PhoneNumber { get; set; } = String.Empty;
     public string Nickname { get; set; } = String.Empty;
     public short Age { get; set; } = 0;
 

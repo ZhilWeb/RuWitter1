@@ -34,6 +34,8 @@ namespace RuWitter1.Server.Models
         [JsonIgnore]
         public CommunityCategory? CommunityCategory { get; set; }
 
+        [JsonIgnore]
+        public ICollection<Post>? Posts { get; set; }
 
         [JsonIgnore]
         public ICollection<CommunityPostsLikes>? CommunityPostsLikes { get; set; }

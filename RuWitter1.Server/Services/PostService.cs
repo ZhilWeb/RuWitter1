@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RuWitter1.Server.Interfaces;
 using RuWitter1.Server.Models;
+using System.Collections;
 
 namespace RuWitter1.Server.Services;
 
@@ -28,7 +29,7 @@ public class PostService : IPostInterface
 
         if(body == null) 
         {
-            throw new Exception("Body has invalid.");
+            return;
         }
         
         
@@ -264,12 +265,13 @@ public class PostService : IPostInterface
         throw new NotImplementedException();
     }
 
-    public async Task<int> SetLike(string userId, int postId) 
+    public async Task<int> SetLike(string userId, int postId, int? commentId = null) 
     {
         PostsLikes like = new PostsLikes 
         {
             DefaultUserId = userId,
-            PostId = postId
+            PostId = postId,
+            CommentId = commentId
         };
 
         await _context.PostsLikes.AddAsync(like);
@@ -277,18 +279,49 @@ public class PostService : IPostInterface
         return postId;
     }
 
-    public async Task<int> SetLikeByCommunity(string userId, int communityId, int postId)
+    public async Task<int> SetLikeByCommunity(string userId, int communityId, int postId, int? commentId = null)
     {
         CommunityPostsLikes like = new CommunityPostsLikes
         {
             DefaultUserId = userId,
             CommunityId = communityId,
-            PostId = postId
+            PostId = postId,
+            CommentId = commentId
         };
 
         await _context.CommunityPostsLikes.AddAsync(like);
         await _context.SaveChangesAsync();
         return postId;
+    }
+
+    public async Task<bool> DeleteLike(string userId, int postId, int? commentId = null)
+    {
+        PostsLikes? postLike = await _context.PostsLikes
+            .FirstOrDefaultAsync(w => w.DefaultUserId == userId && w.PostId == postId && w.CommentId == commentId);
+
+        if (postLike == null)
+        {
+            return false;
+        }
+
+        _context.PostsLikes.Remove(postLike);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteLikeByCommunity(string userId, int communityId, int postId, int? commentId = null)
+    {
+        CommunityPostsLikes? postLike = await _context.CommunityPostsLikes
+            .FirstOrDefaultAsync(w => w.DefaultUserId == userId && w.CommunityId == communityId && w.PostId == postId && w.CommentId == commentId);
+
+        if (postLike == null)
+        {
+            return false;
+        }
+
+        _context.CommunityPostsLikes.Remove(postLike);
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<bool> DeletePostWatches(string userId) 
@@ -305,5 +338,97 @@ public class PostService : IPostInterface
         _context.CommunityPostWatches.RemoveRange(communityPostWatches);
         await _context.SaveChangesAsync();
         return true;
+    }
+
+
+    public async Task<IEnumerable<Post>?> GetPostsBySearch(string userId, string postSubString, 
+        string communityNameSubString, List<int> communityCategoryIds, DateTime dateTimeFrom, DateTime dateTimeTo) 
+    {
+        // устанавливаем значения по умолчанию
+        if (postSubString == null) 
+        {
+            postSubString = "";
+        }
+
+        if (communityNameSubString == null)
+        {
+            communityNameSubString = "";
+        }
+
+        if (communityCategoryIds.Count == 0) 
+        {
+            communityCategoryIds = await _context.CommunityCategories
+                .OrderBy(c => c.Id)
+                .Select(c => c.Id)
+                .ToListAsync();
+        }
+
+        if (dateTimeFrom == default(DateTime)) 
+        {
+            dateTimeFrom = new DateTime();
+        }
+
+        if (dateTimeTo == default(DateTime)) 
+        {
+            dateTimeTo = new DateTime();
+        }
+        Console.WriteLine(postSubString);
+        Console.WriteLine(communityNameSubString);
+        Console.WriteLine(dateTimeFrom);
+        Console.WriteLine(dateTimeTo);
+
+        // получаем лайки
+        List<CommunityPostsLikes> communityPostsLikes = _context.CommunityPostsLikes
+            .Where(l => l.DefaultUserId == userId && l.CommentId == null)
+            .ToList();
+
+        List<int> communityPostsLikesIds = communityPostsLikes
+            .OrderBy(l => l.PostId)
+            .Select(l => l.PostId)
+            .ToList();
+        List<string> communityPostsLikesTexts = _context.Posts
+            .Where(p => communityPostsLikesIds.Contains(p.Id))
+            .OrderBy(p => p.Id)
+            .Select(p => p.Body)
+            .ToList();
+
+        // получаем записи по введенным параметрам
+        List<Post> posts = await _context.Posts
+            .Include(p => p.MediaFiles)
+            .Where(p => p.Body.Contains(postSubString))
+            .Where(p => p.Community != null && p.Community.Name.Contains(communityNameSubString))
+            .Where(p => p.Community != null && p.Community.CommunityCategoryId != null && communityCategoryIds.Contains((int)p.Community.CommunityCategoryId))
+            .Where(p => p.PublicDate > dateTimeFrom && p.PublicDate < dateTimeTo)
+            .ToListAsync();
+
+        List<int> postIds = posts
+            .OrderBy(p => p.Id)
+            .Select(p => p.Id)
+            .ToList();
+        List<string> postTexts = posts
+            .OrderBy(p => p.Id)
+            .Select(p => p.Body)
+            .ToList();
+
+
+
+        // получаем рекомендации
+        List<int> recommendations = await _recommendationClient
+            .GetPostReccomendsForSearch(communityPostsLikesIds, communityPostsLikesTexts, postIds, postTexts);
+
+        Dictionary<int, int> sortRecommendations = recommendations
+        .Select((id, index) => new
+        {
+            id,
+            index
+        })
+        .ToDictionary(
+            x => x.id,
+            x => x.index
+        );
+
+        return posts
+            .OrderBy(p => sortRecommendations[p.Id])
+            .ToList();
     }
 }

@@ -17,13 +17,13 @@ namespace RuWitter1.Server.Services
         }
 
         public async Task<List<int>> GetPostReccomends(List<int> communityPostsLikesIds,
-            List<int> communityPostWatchesIds, List<string> postTexts, int feedSize = 10, CancellationToken token = default)
+            List<int> communityPostWatchesIds, List<string> postLikedTexts, int feedSize = 10, CancellationToken token = default)
         {
             var payload = JsonSerializer.Serialize(
                         new
                         {
                             likedIndices = communityPostsLikesIds,
-                            likedTexts = postTexts,
+                            likedTexts = postLikedTexts,
                             watchedIndices = communityPostWatchesIds,
                             feedSize = feedSize
                         }
@@ -47,6 +47,53 @@ namespace RuWitter1.Server.Services
                 .PostAsync(
 
                     "http://127.0.0.1:8000/ruwrecom/",
+
+                    content,
+                    token
+                );
+
+            response.EnsureSuccessStatusCode();
+
+            var data = await response.Content.ReadFromJsonAsync<RecommendationResponse>(cancellationToken: token);
+            if (data == null)
+            {
+                return [];
+            }
+            return data.Recommendations;
+        }
+
+
+        public async Task<List<int>> GetPostReccomendsForSearch(List<int> communityPostsLikesIds, List<string> postLikedTexts,
+            List<int> postsIds, List<string> postsTexts, CancellationToken token = default)
+        {
+            var payload = JsonSerializer.Serialize(
+                        new
+                        {
+                            likedIndices = communityPostsLikesIds,
+                            postLikedTexts,
+                            postsIds,
+                            postsTexts,
+                        }
+                    );
+
+            var content = new StringContent(
+
+                payload,
+
+                Encoding.UTF8,
+
+                "application/json"
+            );
+
+
+            // =====================================
+            // Trigger rebuild
+            // =====================================
+
+            var response = await _httpClient
+                .PostAsync(
+
+                    "http://127.0.0.1:8000/ruwrecom-search/",
 
                     content,
                     token

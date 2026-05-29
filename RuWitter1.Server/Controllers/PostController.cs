@@ -17,12 +17,15 @@ namespace RuWitter1.Server.Controllers
         private readonly IPostInterface _postService;
         private readonly UserManager<DefaultUser> _userManager;
         private readonly ICommunityInterface _communityService;
+        private readonly ICommentInterface _commentService;
 
-        public PostController(IPostInterface postService, UserManager<DefaultUser> userManager, ICommunityInterface communityService)
+        public PostController(IPostInterface postService, UserManager<DefaultUser> userManager, 
+            ICommunityInterface communityService, ICommentInterface commentService)
         {
             _postService = postService;
             _userManager = userManager;
             _communityService = communityService;
+            _commentService = commentService;
         }
 
         // GET: api/<PostController>/count
@@ -90,31 +93,7 @@ namespace RuWitter1.Server.Controllers
         }
 
 
-        // POST api/<PostController>/community/2/post/4
-        [HttpPost("/community/post/{postId}")]
-        public async Task<IActionResult> LikeByCommunity(int postId) 
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized();
-            }
-            Post? post = _postService.GetPostById(postId);
-            if(post == null || post.CommunityId == 0) 
-            {
-                return NotFound();
-            }
-            Community? community = _communityService.GetCommunityById(post.CommunityId);
-            if(community == null || community.Id == 0) 
-            {
-                return NotFound();
-            }
-            
-
-            int resultPostId = await _postService.SetLikeByCommunity(userId, community.Id, postId);
-            return Ok(resultPostId);
-        }
+        
 
         // GET: api/<PostController>
         [HttpGet]
@@ -150,5 +129,267 @@ namespace RuWitter1.Server.Controllers
             return Ok("Данные о просмотрах записей сообществ удалены.");
         }
 
+        // POST: api/<PostController>/search
+        [HttpPost("search")]
+        public async Task<IEnumerable<Post>?> GetPostBySearch([FromForm] List<int> communityCategoryIds, 
+            [FromForm] DateTime dateTimeFrom, [FromForm] DateTime dateTimeTo, 
+            [FromForm] string postSubString = "", [FromForm] string communityNameSubString = "") 
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return [];
+            }
+
+            return await _postService.GetPostsBySearch(userId, postSubString, communityNameSubString, communityCategoryIds, dateTimeFrom, dateTimeTo);
+        }
+
+
+
+
+        // POST api/<PostController>/community/like/4
+        [HttpPost("/community/like/{postId}")]
+        public async Task<IActionResult> SetLikeByCommunity(int postId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            Post? post = _postService.GetPostById(postId);
+            if (post == null || post.Id == 0)
+            {
+                return NotFound();
+            }
+            Community? community = _communityService.GetCommunityById(post.CommunityId);
+            if (community == null || community.Id == 0)
+            {
+                return NotFound();
+            }
+
+
+            int resultPostId = await _postService.SetLikeByCommunity(userId, community.Id, postId, null);
+            return Ok(resultPostId);
+        }
+
+        // POST api/<PostController>/like/4
+        [HttpPost("/like/{postId}")]
+        public async Task<IActionResult> SetLike(int postId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            Post? post = _postService.GetPostById(postId);
+            if (post == null || post.Id == 0)
+            {
+                return NotFound();
+            }
+
+            // не принадлежит обществу
+            Community? community = _communityService.GetCommunityById(post.CommunityId);
+            if (community != null || community.Id != 0)
+            {
+                return NotFound();
+            }
+
+
+            int resultPostId = await _postService.SetLike(userId, postId, null);
+            return Ok(resultPostId);
+        }
+
+        // POST api/<PostController>/community/like/4/5
+        [HttpPost("/community/like/{postId}/{commentId}")]
+        public async Task<IActionResult> SetCommentLikeByCommunity(int postId, int commentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            Post? post = _postService.GetPostById(postId);
+            if (post == null || post.Id == 0)
+            {
+                return NotFound();
+            }
+            Community? community = _communityService.GetCommunityById(post.CommunityId);
+            if (community == null || community.Id == 0)
+            {
+                return NotFound();
+            }
+
+            Comment? comment = await _commentService.GetCommentById(postId, commentId);
+
+            if (comment == null || comment.Id != commentId || comment.PostId != postId)
+            {
+                return NotFound();
+            }
+
+            int resultPostId = await _postService.SetLikeByCommunity(userId, community.Id, postId, null);
+            return Ok(resultPostId);
+        }
+
+        // POST api/<PostController>/like/4
+        [HttpPost("/like/{postId}/{commentId}")]
+        public async Task<IActionResult> SetCommentLike(int postId, int commentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            Post? post = _postService.GetPostById(postId);
+            if (post == null || post.Id == 0)
+            {
+                return NotFound();
+            }
+
+            // не принадлежит обществу
+            Community? community = _communityService.GetCommunityById(post.CommunityId);
+            if (community != null || community.Id != 0)
+            {
+                return NotFound();
+            }
+
+            Comment? comment = await _commentService.GetCommentById(postId, commentId);
+
+            if (comment == null || comment.Id != commentId || comment.PostId != postId)
+            {
+                return NotFound();
+            }
+
+
+            int resultPostId = await _postService.SetLike(userId, postId, null);
+            return Ok(resultPostId);
+        }
+
+
+
+        // POST api/<PostController>/delete/community/like/4
+        [HttpPost("delete/community/like/{postId}")]
+        public async Task<IActionResult> DeleteLikeByCommunity(int postId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            Post? post = _postService.GetPostById(postId);
+            if (post == null || post.Id == 0)
+            {
+                return NotFound();
+            }
+            Community? community = _communityService.GetCommunityById(post.CommunityId);
+            if (community == null || community.Id == 0)
+            {
+                return NotFound();
+            }
+
+
+            bool resultPostId = await _postService.DeleteLikeByCommunity(userId, community.Id, postId, null);
+            return Ok(resultPostId);
+        }
+
+        // POST api/<PostController>/delete/like/4
+        [HttpPost("delete/like/{postId}")]
+        public async Task<IActionResult> DeleteLike(int postId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            Post? post = _postService.GetPostById(postId);
+            if (post == null || post.Id == 0)
+            {
+                return NotFound();
+            }
+
+            // не принадлежит обществу
+            Community? community = _communityService.GetCommunityById(post.CommunityId);
+            if (community != null || community.Id != 0)
+            {
+                return NotFound();
+            }
+
+
+            bool resultPostId = await _postService.DeleteLike(userId, postId, null);
+            return Ok(resultPostId);
+        }
+
+        // POST api/<PostController>/delete/community/like/4/5
+        [HttpPost("delete/community/like/{postId}/{commentId}")]
+        public async Task<IActionResult> DeleteCommentLikeByCommunity(int postId, int commentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            Post? post = _postService.GetPostById(postId);
+            if (post == null || post.Id == 0)
+            {
+                return NotFound();
+            }
+            Community? community = _communityService.GetCommunityById(post.CommunityId);
+            if (community == null || community.Id == 0)
+            {
+                return NotFound();
+            }
+
+            Comment? comment = await _commentService.GetCommentById(postId, commentId);
+
+            if (comment == null || comment.Id != commentId || comment.PostId != postId)
+            {
+                return NotFound();
+            }
+
+            bool resultPostId = await _postService.DeleteLikeByCommunity(userId, community.Id, postId, null);
+            return Ok(resultPostId);
+        }
+
+        // POST api/<PostController>/delete/like/4
+        [HttpPost("delete/like/{postId}/{commentId}")]
+        public async Task<IActionResult> DeleteCommentLike(int postId, int commentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            Post? post = _postService.GetPostById(postId);
+            if (post == null || post.Id == 0)
+            {
+                return NotFound();
+            }
+
+            // не принадлежит обществу
+            Community? community = _communityService.GetCommunityById(post.CommunityId);
+            if (community != null || community.Id != 0)
+            {
+                return NotFound();
+            }
+
+            Comment? comment = await _commentService.GetCommentById(postId, commentId);
+
+            if (comment == null || comment.Id != commentId || comment.PostId != postId)
+            {
+                return NotFound();
+            }
+
+
+            bool resultPostId = await _postService.DeleteLike(userId, postId, null);
+            return Ok(resultPostId);
+        }
     }
 }

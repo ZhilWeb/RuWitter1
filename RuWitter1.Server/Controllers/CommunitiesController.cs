@@ -102,6 +102,21 @@ public class CommunitiesController : ControllerBase
         return NoContent();
     }
 
+    // GET: api/Community/search
+    [HttpGet("search")]
+    public async Task<IEnumerable<Community>> GetCommunityBySearch([FromForm] List<int> communityCategoryIds, [FromForm] string name = "",
+            [FromForm] string briefInformationSubstring = "", [FromForm] string managerName = "")
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return [];
+        }
+
+        return await _communityService.GetCommunityBySearch(name, communityCategoryIds, briefInformationSubstring, managerName);
+    }
+
     private bool CommunityExists(int? id)
     {
         return _context.Communities.Any(e => e.Id == id);
