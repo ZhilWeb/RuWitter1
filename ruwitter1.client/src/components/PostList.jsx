@@ -1,8 +1,8 @@
 ﻿import React from "react";
 import PostItem from "./PostItem";
+import cl from "../pages/Posts/Posts.module.css";
 
-
-const PostList = ({ posts, remove }) => {
+const PostList = ({ posts, lastElement }) => {
 
     if (!posts.length) {
         return (
@@ -13,10 +13,11 @@ const PostList = ({ posts, remove }) => {
     }
 
     return (
-        <div className="posts">
+        <div className={cl.posts }>
             {posts.map((post, index) =>
-                <PostItem remove={remove} number={index + 1} post={post} key={post.id}/>
+                <PostItem number={index + 1} post={post} key={post.id}/>
             )}
+            <div ref={lastElement} style={{ background: '#FF0000', height: 20 }} />
         </div>
     );
 };

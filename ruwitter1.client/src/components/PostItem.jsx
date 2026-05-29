@@ -4,6 +4,7 @@ import { CommentOutlined } from '@ant-design/icons';
 // import { useNavigate } from "react-router";
 // import { NavLink } from "react-router";
 import { Link } from 'react-router-dom';
+import cl from "../pages/Posts/Posts.module.css";
 
 const PostItem = (props) => {
     // let router = useNavigate();
@@ -11,9 +12,9 @@ const PostItem = (props) => {
 
 
     return (
-        <div className="post">
+        <div className={ cl.post }>
             <div className="post__content">
-                <img src={`data:${props.post.user.avatar.contentType};base64,${props.post.user.avatar.data}`} height="400px" />
+                {props.post.user.avatar && <img src={`data:${props.post.user.avatar.contentType};base64,${props.post.user.avatar.data}`} height="400px" />}
                 <strong>{props.post.user.nickname}. {props.post.publicDate}</strong>
                 <br></br>
                 <p>{props.post.body}</p>
@@ -25,7 +26,7 @@ const PostItem = (props) => {
             <div className="post__btns">
                 {/*onClick={() => router(`/posts/${props.post.id}`)}*/ }
                 <MyButton>Открыть</MyButton>
-                <MyButton onClick={() => props.remove(props.post)}>Удалить</MyButton>
+                {/*<MyButton onClick={() => props.remove(props.post)}>Удалить</MyButton>*/}
                 <Link to={`/post?id=${props.post.id}`}><CommentOutlined style={{ fontSize: '40px' }} /></Link>
             </div>
         </div>

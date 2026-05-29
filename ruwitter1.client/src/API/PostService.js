@@ -23,9 +23,9 @@ export default class PostService {
     };
     */
 
-    static async getPosts(lastPostId) {
+    static async getPosts() {
 
-        const posts = fetch(`/api/Post/${lastPostId}`, {
+        const posts = fetch(`/api/Post`, {
             method: "GET"
         }).then((response) => response.json());
         // console.log(posts);

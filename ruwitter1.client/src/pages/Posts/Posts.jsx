@@ -19,46 +19,41 @@ import SidebarRuW from "../../components/SidebarRuW/SidebarRuW";
 import cl from "./Posts.module.css";
 // import { useNavigate } from "react-router";
 import AuthorizeView from "../../components/AuthorizeView";
+import PostItem from "../../components/PostItem";
 
 function Posts() {
 
     const [posts, setPosts] = useState([]);
     const [users, setUsers] = useState([]);
-    const [lastPostId, setLastPostId] = useState(0);
+    // const [lastPostId, setLastPostId] = useState(0);
     const [filter, setFilter] = useState({ sort: '', query: '' });
     const [modal, setModal] = useState(false);
     // const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
     const lastElement = useRef();
     console.log(lastElement);
-
-    const [totalCount, setTotalCount] = useState(0);
-    const limit = 10;
-    const [totalPages, setTotalPages] = useState(0);
     
-    const [page, setPage] = useState(1);
+    // const [page, setPage] = useState(1);
 
 
-    const [fetchPosts, isPostsLoading, postError] = useFetching(async (lastPostId) => {
+    const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
         
 
-        let postsPart = await PostService.getPosts(lastPostId);
-        setTotalCount(await PostService.getCountOfPosts());
-        setTotalPages(getPageCount(totalCount, limit));
+        let postsPart = await PostService.getPosts();
         
         // console.log(postsPart[0]);
         let personDataPart = [];
-        let avatarDataPart = [];
+        // let avatarDataPart = [];
         for (let post of postsPart) {
             const personData = await PostService.getPersonalDataById(post.userId);
             personDataPart.push(personData);
-            const avatar = await PostService.getAvatarById(personData.avatarId);
-            console.log(avatar);
-            avatarDataPart.push(avatar);
+            // const avatar = await PostService.getAvatarById(personData.avatarId);
+            // console.log(personData.avatar);
+            // avatarDataPart.push(avatar);
         }
         
         for (let i = 0; i < postsPart.length; i++) {
             postsPart[i].user = personDataPart[i];
-            postsPart[i].user.avatar = avatarDataPart[i];
+            // postsPart[i].user.avatar = avatarDataPart[i];
 
         }
 
@@ -67,16 +62,16 @@ function Posts() {
         
         setUsers([...users, ...personDataPart]);
         setPosts([...posts, ...postsPart]);
-        setLastPostId(personDataPart[personDataPart.length - 1].id)
+        // setLastPostId(personDataPart[personDataPart.length - 1].id)
     });
 
-    useObserver(lastElement, page < totalPages, isPostsLoading, () => setPage(page + 1));
+    useObserver(lastElement, posts.length > 0, isPostsLoading, fetchPosts);
 
 
     useEffect(() => {
-        // console.log("ef");
-        fetchPosts(lastPostId);
-    }, [page]);
+        console.log("ef");
+        fetchPosts();
+    }, []);
 
     const createPost = (newPost) => {
         setPosts([...posts, newPost])
@@ -88,9 +83,9 @@ function Posts() {
         setPosts(posts.filter(p => p.id !== post.id))
     };
 
-    const changePage = (page) => {
-        setPage(page);
-    };
+    // const changePage = (page) => {
+    //     setPage(page);
+    // };
 
     const { Header, Content, Footer, Sider } = Layout;
 
@@ -108,8 +103,8 @@ function Posts() {
                     <SidebarRuW isActive={isActiveSidebar} />
                     <ContentRuW>
                         {postError && <h1>Произошла ошибка ${postError}</h1>}
-                        <PostList remove={removePost} posts={posts} />
-                        <div ref={lastElement} style={{ background: '#FF0000', height: 20 }} />
+                        <PostList posts={posts} lastElement={lastElement} />
+                        
                         {isPostsLoading
                             && <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}><LoadingOutlined /></div>
                         }

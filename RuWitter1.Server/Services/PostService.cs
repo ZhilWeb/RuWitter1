@@ -182,6 +182,7 @@ public class PostService : IPostInterface
         // получаем тексты понравившихся записей
         List<string> postsTexts = _context.Posts
             .Where(p => communityPostsLikesIds.Contains(p.Id))
+            .Where(p => p.UserId != userId)
             .Select(p => p.Body)
             .ToList();
 
@@ -399,6 +400,7 @@ public class PostService : IPostInterface
             .Where(p => p.Community != null && p.Community.Name.Contains(communityNameSubString))
             .Where(p => p.Community != null && p.Community.CommunityCategoryId != null && communityCategoryIds.Contains((int)p.Community.CommunityCategoryId))
             .Where(p => p.PublicDate > dateTimeFrom && p.PublicDate < dateTimeTo)
+            .Where(p => p.UserId != userId)
             .ToListAsync();
 
         List<int> postIds = posts
