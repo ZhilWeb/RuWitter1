@@ -1,15 +1,9 @@
-import React from "react";
-import MyButton from "./UI/button/MyButton";
-import { CommentOutlined, HeartFilled, HeartOutlined  } from '@ant-design/icons';
-// import { useNavigate } from "react-router";
-// import { NavLink } from "react-router";
 import { Link } from 'react-router-dom';
 import cl from "../pages/Posts/Posts.module.css";
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
-
-const PostItem = (props) => {
+const CommentItem = (props) => {
     // let router = useNavigate();
 
     const date = new Date(props.post.publicDate);
@@ -28,14 +22,13 @@ const PostItem = (props) => {
                 {props.post.mediaFiles && props.post.mediaFiles.map((mediaFile) =>
                     <img src={`data:${mediaFile.contentType};base64,${mediaFile.data}`} height="400px" key={mediaFile.id} />
                 )}
-                <div className={ cl.post_btns }>
+                <div className={cl.post_btns}>
                     {/*onClick={() => router(`/posts/${props.post.id}`)}*/}
-                    {props.disableCommentLink ? <CommentOutlined style={{ fontSize: '40px', color: '#1677FF' }} /> : <Link to={`/post?id=${props.post.id}`}><CommentOutlined style={{ fontSize: '40px' }} /></Link>}
                     {props.post.hasLike ?
                         <HeartFilled style={{ fontSize: '40px', color: 'red' }} disabled={props.isLikeLoading} onClick={() => props.handleLike(props.post)} /> :
                         <HeartOutlined style={{ fontSize: '40px', color: 'red' }} disabled={props.isLikeLoading} onClick={() => props.handleLike(props.post)} />}
-                    {/*<MyButton onClick={() => props.remove(props.post)}>”‰‡ÎËÚ¸</MyButton>*/}
-                    
+                    {/*<MyButton onClick={() => props.remove(props.post)}>–£–¥–∞–ª–∏—Ç—å</MyButton>*/}
+
                 </div>
                 {/*<div className={cl.post_data}>{Intl.DateTimeFormat('ru-RU', {
                     hour: '2-digit',
@@ -46,9 +39,9 @@ const PostItem = (props) => {
                 }).format(date)}</div>*/}
                 {<div className={cl.post_data}>{format(date, "HH:mm d MMMM yyyy", { locale: ru })}</div>}
             </div>
-            
+
         </div>
     );
 };
 
-export default PostItem;
+export default CommentItem;

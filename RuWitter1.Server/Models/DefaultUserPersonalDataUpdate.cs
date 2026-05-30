@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace RuWitter1.Server.Models;
 
 public class DefaultUserPersonalDataUpdate
 {
-    public MediaFile? Avatar { get; set; }
-    public required string UserId { get; set; }
+    public int? AvatarId { get; set; }
+    public string? UserId { get; set; }
 
     public string PhoneNumber { get; set; } = String.Empty;
     public string Nickname { get; set; } = String.Empty;

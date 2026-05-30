@@ -40,6 +40,16 @@ export default class PostService {
         return personData;
     }
 
+    static async getCommunityById(id) {
+        if (id === null) return;
+        console.log(id);
+        const community = fetch(`/api/Communities/${id}`, {
+            method: "GET"
+        }).then((response) => response.json());
+        // console.log(personData);
+        return community;
+    }
+
     static async getCountOfPosts() {
 
         const postsCount = fetch('/api/Post/count', {
@@ -51,6 +61,7 @@ export default class PostService {
 
 
     static async getAvatarById(avatarId) {
+        console.log(avatarId);
         try {
             const avatar = fetch(`/api/MediaFile/${avatarId}`, {
                 method: "GET"
@@ -64,6 +75,51 @@ export default class PostService {
             return undefined;
         }
         
+    }
+
+    static async isSetLikeByCurrentUser(postId){
+        const formData = new FormData();
+        formData.append('PostId', postId);
+        // formData.append('CommentId', null);
+        console.log(formData);
+        try {
+            const response = await fetch(`api/Post/issetlike`, {
+                method: 'POST',
+
+                body: formData
+
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error sending message with file:', error);
+            throw error;
+        }
+    }
+
+    static async setLikeByCommunity(id){
+        try {
+            const response = await fetch(`api/Post/community/like/${id}`, {
+                method: 'POST',
+            });
+            console.log(response);
+            return response;
+        } catch (error) {
+            console.error('Error sending message with file:', error);
+            throw error;
+        }
+    }
+
+    static async deleteLikeByCommunity(id) {
+        try {
+            const response = await fetch(`api/Post/delete/community/like/${id}`, {
+                method: 'POST',
+            });
+            console.log(response);
+            return response;
+        } catch (error) {
+            console.error('Error sending message with file:', error);
+            throw error;
+        }
     }
 
     static async getPostById(postId) {

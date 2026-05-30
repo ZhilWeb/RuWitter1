@@ -53,7 +53,7 @@ public class DefaultUserService : IDefaultUserInterface
 
             DefaultUserPersonalDataUpdate personalData = new DefaultUserPersonalDataUpdate
             {
-                Avatar = user.Avatar,
+                AvatarId = user.AvatarId,
                 UserId = user.Id,
                 PhoneNumber = phoneNumberPersonalData,
                 Nickname = user.Nickname,
@@ -86,21 +86,29 @@ public class DefaultUserService : IDefaultUserInterface
         return await _userManager.FindByIdAsync(userId);
     }
 
-    public async Task<IdentityResult> UpdatePersonalDataAsync(DefaultUserPersonalDataUpdate updatedUserData)
+    public async Task<IdentityResult> UpdatePersonalDataAsync(string userId, DefaultUserPersonalDataUpdate updatedUserData, IFormFile iFormFile)
     {
-        var existingUser = await _userManager.FindByIdAsync(updatedUserData.UserId);
+        updatedUserData.UserId = userId;
+        var existingUser = await _userManager.FindByIdAsync(userId);
 
         if(existingUser == null) 
         {
             return IdentityResult.Failed(new IdentityError { Description = "User not found." });
         }
 
-        // existingUser.PhoneNumber = updatedUserData.PhoneNumber;
+        existingUser.PhoneNumber = updatedUserData.PhoneNumber;
         existingUser.Nickname = updatedUserData.Nickname;
         existingUser.Age = updatedUserData.Age;
         existingUser.BriefInformation = updatedUserData.BriefInformation;
         existingUser.City = updatedUserData.City;
         existingUser.Interests = updatedUserData.Interests;
+
+        if(existingUser.AvatarId != null) 
+        {
+            bool result = await _mediaFileService.Delete((int)existingUser.AvatarId);
+        }
+        MediaFile? mediaFile = await _mediaFileService.InitMediaFile(iFormFile);
+        existingUser.Avatar = mediaFile;
 
         return await _userManager.UpdateAsync(existingUser);
     }

@@ -75,24 +75,20 @@ namespace RuWitter1.Server.Controllers
                 return NotFound();
             }
 
-            if (User.Identity.Name != user.UserName && !User.IsInRole("Admin"))
+            // возвращаем общедоступные персональные данные
+            var personalData = new DefaultUserPersonalDataUpdate
             {
-                // возвращаем общедоступные персональные данные
-                var personalData = new DefaultUserPersonalDataUpdate
-                {
-                    UserId = user.Id,
-                    Nickname = user.Nickname,
-                    Age = user.Age,
-                    BriefInformation = user.BriefInformation,
-                    City = user.City,
-                    Interests = user.Interests,
-                    Avatar = user.Avatar,
-                };
+                UserId = user.Id,
+                Nickname = user.Nickname,
+                Age = user.Age,
+                BriefInformation = user.BriefInformation,
+                City = user.City,
+                Interests = user.Interests,
+                AvatarId = user.AvatarId,
+                PhoneNumber = user.PhoneNumber
+            };
 
-                return Ok(personalData);
-            }
-
-            return Ok(user);
+            return Ok(personalData);
         }
 
 
@@ -117,9 +113,11 @@ namespace RuWitter1.Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] DefaultUser updatedUser)
         {
-            if (id != updatedUser.Id) 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest();
+                return Unauthorized();
             }
 
             var existingUser = await _defaultUserService.GetUserByIdAsync(id);
@@ -139,25 +137,20 @@ namespace RuWitter1.Server.Controllers
 
         // PUT api/<DefaultUserController>/personaldata/5
         [HttpPut("personaldata/{id}")]
-        public async Task<IActionResult> UpdatePersonalData([FromBody] DefaultUserPersonalDataUpdate updatedUserData)
+        public async Task<IActionResult> UpdatePersonalData([FromForm] DefaultUserPersonalDataUpdate updatedUserData, IFormFile avatar)
         {
             if(updatedUserData == null) 
             {
                 return BadRequest();
             }
-            var existingUser = await _defaultUserService.GetUserByIdAsync(updatedUserData.UserId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (existingUser == null)
+            if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest();
+                return Unauthorized();
             }
 
-            if (User.Identity.Name != existingUser.UserName && !User.IsInRole("Admin"))
-            {
-                return Forbid();
-            }
-
-            var result = await _defaultUserService.UpdatePersonalDataAsync(updatedUserData);
+            var result = await _defaultUserService.UpdatePersonalDataAsync(userId, updatedUserData, avatar);
             if (!result.Succeeded)
             {
                 return BadRequest(result.Errors);

@@ -2,7 +2,7 @@
 import PostItem from "./PostItem";
 import cl from "../pages/Posts/Posts.module.css";
 
-const PostList = ({ posts, lastElement }) => {
+const PostList = ({ posts, lastElement, isLikeLoading, handleLike }) => {
 
     if (!posts.length) {
         return (
@@ -13,10 +13,12 @@ const PostList = ({ posts, lastElement }) => {
     }
 
     return (
-        <div className={cl.posts }>
-            {posts.map((post, index) =>
-                <PostItem number={index + 1} post={post} key={post.id}/>
-            )}
+        <div className={cl.post_container}>
+            <div className="posts">
+                {posts.map((post, index) =>
+                    <PostItem number={index + 1} post={post} key={post.id} isLikeLoading={isLikeLoading} handleLike={handleLike} />
+                    )}
+            </div>
             <div ref={lastElement} style={{ background: '#FF0000', height: 20 }} />
         </div>
     );

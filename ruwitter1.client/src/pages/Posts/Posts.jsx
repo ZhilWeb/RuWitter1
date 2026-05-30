@@ -28,6 +28,7 @@ function Posts() {
     // const [lastPostId, setLastPostId] = useState(0);
     const [filter, setFilter] = useState({ sort: '', query: '' });
     const [modal, setModal] = useState(false);
+    const [isLikeLoading, setIsLikeLoading] = useState(false);
     // const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
     const lastElement = useRef();
     console.log(lastElement);
@@ -36,32 +37,35 @@ function Posts() {
 
 
     const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
-        
+        console.log(posts);
 
         let postsPart = await PostService.getPosts();
         
         // console.log(postsPart[0]);
         let personDataPart = [];
-        // let avatarDataPart = [];
+        let avatarDataPart = [];
+        let likesDataPart = [];
         for (let post of postsPart) {
-            const personData = await PostService.getPersonalDataById(post.userId);
+            const personData = await PostService.getCommunityById(post.communityId);
             personDataPart.push(personData);
-            // const avatar = await PostService.getAvatarById(personData.avatarId);
+            // console.log(personData);
+            const avatar = await PostService.getAvatarById(personData.avatarId);
             // console.log(personData.avatar);
-            // avatarDataPart.push(avatar);
+            avatarDataPart.push(avatar);
+            const hasLike = await PostService.isSetLikeByCurrentUser(post.id);
+            likesDataPart.push(hasLike);
         }
         
         for (let i = 0; i < postsPart.length; i++) {
             postsPart[i].user = personDataPart[i];
-            // postsPart[i].user.avatar = avatarDataPart[i];
-
+            postsPart[i].user.avatar = avatarDataPart[i];
+            postsPart[i].hasLike = likesDataPart[i];
         }
 
         console.log(postsPart);
 
-        
-        setUsers([...users, ...personDataPart]);
-        setPosts([...posts, ...postsPart]);
+        setUsers(prevUsers => [...prevUsers, ...personDataPart]);
+        setPosts(prevPosts => [...prevPosts, ...postsPart]);
         // setLastPostId(personDataPart[personDataPart.length - 1].id)
     });
 
@@ -81,6 +85,38 @@ function Posts() {
 
     const removePost = (post) => {
         setPosts(posts.filter(p => p.id !== post.id))
+    };
+
+    
+
+    const handleLike = async (post) => {
+        if (isLikeLoading) return;
+
+        setIsLikeLoading(true);
+
+        const newHasLike = !post.hasLike;
+        try {
+            if (post.hasLike) {
+                await PostService.deleteLikeByCommunity(post.id);
+            } else
+            {
+                await PostService.setLikeByCommunity(post.id);
+            }
+                
+        }
+        finally {
+            setIsLikeLoading(false);
+            setPosts(posts =>
+                posts.map(rendPost =>
+                    rendPost.id === post.id
+                        ? {
+                            ...rendPost,
+                            hasLike: newHasLike,
+                        }
+                        : rendPost
+                )
+            );
+        }
     };
 
     // const changePage = (page) => {
@@ -103,7 +139,7 @@ function Posts() {
                     <SidebarRuW isActive={isActiveSidebar} />
                     <ContentRuW>
                         {postError && <h1>Произошла ошибка ${postError}</h1>}
-                        <PostList posts={posts} lastElement={lastElement} />
+                        <PostList posts={posts} lastElement={lastElement} isLikeLoading={isLikeLoading} handleLike={handleLike} />
                         
                         {isPostsLoading
                             && <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}><LoadingOutlined /></div>

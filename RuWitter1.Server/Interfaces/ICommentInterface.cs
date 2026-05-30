@@ -5,7 +5,7 @@ namespace RuWitter1.Server.Interfaces;
 public interface ICommentInterface
 {
     Task<IEnumerable<Comment>?> GetAllOfPost(int postId);
-    Task<Comment?> GetCommentById(int postId, int commentId);
+    Task<Comment?> GetCommentById(int postId, int? commentId = null);
     Task CreateComment(string userId, int postId, string body, List<IFormFile> files);
     Task CreateRepliedComment(string existingUserId, int postId, int hostCommentId, string body, List<IFormFile> files);
     Task UpdateComment(Comment comment);

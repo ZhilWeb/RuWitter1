@@ -9,6 +9,7 @@ import MyModal from "../../components/UI/MyModal/MyModal";
 import PostForm from "../../components/PostForm";
 import PostFilter from "../../components/PostFilter";
 import PostList from "../../components/PostList";
+import PostItem from "../../components/PostItem";
 import Pagination from "../../components/UI/pagination/Pagination";
 import { useObserver } from "../../hooks/useObserver";
 import { Layout } from 'antd';
@@ -17,6 +18,7 @@ import HeaderRuW from "../../components/HeaderRuW/HeaderRuW";
 import ContentRuW from "../../components/ContentRuW/ContentRuW";
 import SidebarRuW from "../../components/SidebarRuW/SidebarRuW";
 import { useParams } from 'react-router';
+import cl from "../Posts/Posts.module.css";
 // import cl from "./Posts.module.css";
 
 function PostIdPage() {
@@ -42,6 +44,7 @@ function PostIdPage() {
     */
     const [comments, setComments] = useState([]);
     const [users, setUsers] = useState([]);
+    const [isPostLikeLoading, setIsPostLikeLoading] = useState(false);
     /*
     const [lastPostId, setLastPostId] = useState(0);
 
@@ -58,10 +61,13 @@ function PostIdPage() {
         console.log("Fetching post and comments for ID:", postId);
         const fetchPostById = async (postId) => {
             const post = await PostService.getPostById(postId);
-            const postPersonData = await PostService.getPersonalDataById(post.userId);
+            const postPersonData = post.communityId == null ? await PostService.getPersonalDataById(post.userId) : await PostService.getCommunityById(post.communityId);
             const avatarPost = await PostService.getAvatarById(postPersonData.avatarId);
+            const hasLike = await PostService.isSetLikeByCurrentUser(post.id);
             post.user = postPersonData;
             post.user.avatar = avatarPost;
+            post.hasLike = hasLike;
+            console.log(post);
             setPost(post);
 
 
@@ -93,7 +99,7 @@ function PostIdPage() {
                 commentsPart[i].user.avatar = avatarDataPart[i];
 
             }
-
+            console.log(commentsPart);
 
             setUsers(personDataPart);
             setComments(commentsPart);
@@ -101,7 +107,7 @@ function PostIdPage() {
         };
 
         fetchComments(postId);
-    }, []);
+    }, [postId]);
 
     /*
     const createPost = (newPost) => {
@@ -121,49 +127,77 @@ function PostIdPage() {
 
     const { Header, Content, Footer, Sider } = Layout;
 
+
     const [isActiveSidebar, setActiveSidebar] = useState(false);
 
     const ToggleSidebar = () => {
         setActiveSidebar(!isActiveSidebar);
     };
-    console.log(post);
-    return (
+
+    const handlePostLike = async (rendPost) => {
+        if (isPostLikeLoading) return;
+
+        setIsPostLikeLoading(true);
+
+        const newHasLike = !rendPost.hasLike;
+        try {
+            if (rendPost.hasLike && rendPost.communityId != null) {
+                await PostService.deleteLikeByCommunity(rendPost.id);
+            } else if (!rendPost.hasLike && rendPost.communityId != null) {
+                await PostService.setLikeByCommunity(rendPost.id);
+            }
+
+        }
+        finally {
+            setIsPostLikeLoading(false);
+            setPost({
+                ...post,
+                hasLike: newHasLike,
+            });
+        }
+    };
+
+    if (!post.id || !post.user)
+    {
+        return (
             <Layout>
                 <HeaderRuW activeSidebar={ToggleSidebar} />
                 <Layout>
                     <SidebarRuW isActive={isActiveSidebar} />
                     <ContentRuW>
-                        <h1>Вы открыли страницу поста с ID={postId}</h1>
-                        {post.id !== undefined &&
-                            <div>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}><LoadingOutlined /></div>
+                    </ContentRuW>
+                </Layout>
+
+            </Layout>
+        );
+    }
+
+    return (
+            <Layout>
+                <HeaderRuW activeSidebar={ToggleSidebar} />
+                <Layout className={cl.main_container}>
+                    <SidebarRuW isActive={isActiveSidebar} />
+                    <ContentRuW>
+                        <div className={cl.post_container}>
+                            <PostItem post={post} isLikeLoading={isPostLikeLoading} handleLike={handlePostLike} disableCommentLink={true} />
+                            {post.id !== undefined &&
                                 <div>
-                                    <img src={`data:${post.user.avatar.contentType};base64,${post.user.avatar.data}`} height="400px" />
-                                    <strong>{post.user.nickname}. {post.publicDate}</strong>
-                                    <p>{post.body}</p>
-                                </div>
-                                <div>
-                                    {post.mediaFiles.map((mediaFile) =>
-                                        <img src={`data:${mediaFile.contentType};base64,${mediaFile.data}`} height="400px" key={mediaFile.id} />
+                                    {comments.map(comment =>
+                                        <div key={comment.id} >
+                                            <img src={`data:${comment.user.avatar.contentType};base64,${comment.user.avatar.data}`} height="400px" />
+                                            <strong>{comment.user.nickname}. {comment.publicDate}</strong>
+                                            <br></br>
+                                            <p>{comment.body}</p>
+                                            {comment.mediaFiles.map((mediaFile) =>
+                                                <img src={`data:${mediaFile.contentType};base64,${mediaFile.data}`} height="400px" key={mediaFile.id} />
+                                            )}
+                                        </div>
                                     )}
                                 </div>
-                            </div>
-                            
-                        }
-                        {post.id !== undefined &&
-                            <div>
-                                {comments.map(comment =>
-                                    <div key={comment.id} >
-                                        <img src={`data:${comment.user.avatar.contentType};base64,${comment.user.avatar.data}`} height="400px" />
-                                        <strong>{comment.user.nickname}. {comment.publicDate}</strong>
-                                        <br></br>
-                                        <p>{comment.body}</p>
-                                        {comment.mediaFiles.map((mediaFile) =>
-                                            <img src={`data:${mediaFile.contentType};base64,${mediaFile.data}`} height="400px" key={mediaFile.id} />
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        }  
+                            } 
+                        </div>
+                         
                     </ContentRuW>
                 </Layout>
 

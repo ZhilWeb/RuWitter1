@@ -168,7 +168,7 @@ public class CommentService : ICommentInterface
             .ToListAsync();
     }
 
-    public async Task<Comment?> GetCommentById(int postId, int commentId)
+    public async Task<Comment?> GetCommentById(int postId, int? commentId = null)
     {
         Post? existingPost = _postService.GetPostById(postId);
         if (existingPost == null) 

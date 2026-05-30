@@ -31,7 +31,8 @@ public class CommunitiesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Community>> GetCommunity(int id)
     {
-        var community = await _context.Communities.FindAsync(id);
+        Console.WriteLine(id);
+        var community = _communityService.GetCommunityById(id);
 
         if (community == null)
         {

@@ -57,5 +57,14 @@ public class PostContext : IdentityDbContext<DefaultUser>
         builder.Entity<MediaFile>()
         .HasIndex(m => m.Name)
         .IsUnique();
+
+        builder.Entity<CommunityPostsLikes>()
+            .HasIndex(x => new { x.DefaultUserId, x.CommunityId, x.PostId, x.CommentId })
+            .IsUnique();
+
+
+        builder.Entity<PostsLikes>()
+            .HasIndex(x => new { x.DefaultUserId, x.PostId, x.CommentId })
+            .IsUnique();
     }
 }

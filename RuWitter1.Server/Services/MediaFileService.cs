@@ -1,11 +1,12 @@
-﻿using RuWitter1.Server.Models;
-using Microsoft.EntityFrameworkCore;
-using RuWitter1.Server.Interfaces;
-using static System.Net.Mime.MediaTypeNames;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using RuWitter1.Server.Interfaces;
+using RuWitter1.Server.Models;
+using System.ComponentModel.Design;
 using System.Xml.Linq;
-using Microsoft.AspNetCore.Http;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace RuWitter1.Server.Services;
 
@@ -69,9 +70,19 @@ public class MediaFileService : IMediaFileInterface
 
     }
 
-    public Task Delete(int id)
+    public async Task<bool> Delete(int id)
     {
-        throw new NotImplementedException();
+        MediaFile? mediaFile = await _context.MediaFiles
+            .FirstOrDefaultAsync(m => m.Id == id);
+
+        if (mediaFile == null)
+        {
+            return false;
+        }
+
+        _context.MediaFiles.Remove(mediaFile);
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<IEnumerable<MediaFile>> GetAll()

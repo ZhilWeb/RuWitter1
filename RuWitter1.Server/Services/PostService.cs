@@ -167,7 +167,7 @@ public class PostService : IPostInterface
             .ToList();
     }
 
-    public async Task<IEnumerable<Post>?> GetPostsByNewsFeed(string userId) 
+    public async Task<IEnumerable<Post>?> GetPostsByNewsFeed(string userId, int minLikes = 5) 
     {
         // получаем лайки и просмотры
         List<int> communityPostsLikesIds = _context.CommunityPostsLikes
@@ -179,10 +179,51 @@ public class PostService : IPostInterface
             .Select(l => l.PostId)
             .ToList();
 
+        if (communityPostsLikesIds.Count < minLikes) 
+        {
+            // берем 10 случайных записей
+            List<Post> randomCommunityPosts = new List<Post>();
+            int postsCount = _context.Posts
+                    .Where(p => p.UserId != userId && p.CommunityId != null)
+                    .Count();
+            while (randomCommunityPosts.Count < 10) 
+            {
+                int randomIndex = new Random().Next(0, postsCount);
+                Post? randomPost = _context.Posts
+                    .Where(p => p.UserId != userId && p.CommunityId != null 
+                        && !communityPostWatchesIds.Contains(p.Id) && !randomCommunityPosts.Contains(p) && !communityPostsLikesIds.Contains(p.Id))
+                    .Skip(randomIndex)
+                    .FirstOrDefault();
+
+                if(randomPost != null) randomCommunityPosts.Add(randomPost);
+
+            }
+            // записываем записи как просмотренные
+            List<CommunityPostWatches> communityRandomPostWatches = new List<CommunityPostWatches>();
+            foreach (var post in randomCommunityPosts)
+            {
+                if (post.CommunityId != null)
+                {
+                    CommunityPostWatches communityPostWatch = new CommunityPostWatches
+                    {
+                        DefaultUserId = userId,
+                        CommunityId = (int)post.CommunityId,
+                        PostId = post.Id,
+                    };
+                    communityRandomPostWatches.Add(communityPostWatch);
+                }
+
+            }
+            await _context.CommunityPostWatches.AddRangeAsync(communityRandomPostWatches);
+            await _context.SaveChangesAsync();
+
+            return randomCommunityPosts;
+        }
+
         // получаем тексты понравившихся записей
         List<string> postsTexts = _context.Posts
             .Where(p => communityPostsLikesIds.Contains(p.Id))
-            .Where(p => p.UserId != userId)
+            .Where(p => p.UserId != userId && p.CommunityId != null)
             .Select(p => p.Body)
             .ToList();
 
@@ -343,7 +384,7 @@ public class PostService : IPostInterface
 
 
     public async Task<IEnumerable<Post>?> GetPostsBySearch(string userId, string postSubString, 
-        string communityNameSubString, List<int> communityCategoryIds, DateTime dateTimeFrom, DateTime dateTimeTo) 
+        string communityNameSubString, List<int> communityCategoryIds, DateTime dateTimeFrom, DateTime dateTimeTo, int minLikes = 5) 
     {
         // устанавливаем значения по умолчанию
         if (postSubString == null) 
@@ -387,12 +428,7 @@ public class PostService : IPostInterface
             .OrderBy(l => l.PostId)
             .Select(l => l.PostId)
             .ToList();
-        List<string> communityPostsLikesTexts = _context.Posts
-            .Where(p => communityPostsLikesIds.Contains(p.Id))
-            .OrderBy(p => p.Id)
-            .Select(p => p.Body)
-            .ToList();
-
+        
         // получаем записи по введенным параметрам
         List<Post> posts = await _context.Posts
             .Include(p => p.MediaFiles)
@@ -403,6 +439,17 @@ public class PostService : IPostInterface
             .Where(p => p.UserId != userId)
             .ToListAsync();
 
+        if (communityPostsLikesIds.Count < minLikes)
+        {
+            return posts;
+        }
+
+        List<string> communityPostsLikesTexts = _context.Posts
+            .Where(p => communityPostsLikesIds.Contains(p.Id))
+            .OrderBy(p => p.Id)
+            .Select(p => p.Body)
+            .ToList();
+
         List<int> postIds = posts
             .OrderBy(p => p.Id)
             .Select(p => p.Id)
@@ -412,7 +459,7 @@ public class PostService : IPostInterface
             .Select(p => p.Body)
             .ToList();
 
-
+        
 
         // получаем рекомендации
         List<int> recommendations = await _recommendationClient
@@ -432,5 +479,29 @@ public class PostService : IPostInterface
         return posts
             .OrderBy(p => sortRecommendations[p.Id])
             .ToList();
+    }
+
+    public async Task<bool> IsSetPostLikeByUser(string userId, int postId, int? commentId = null)
+    {
+        PostsLikes? postLike = await _context.PostsLikes
+            .FirstOrDefaultAsync(w => w.DefaultUserId == userId && w.PostId == postId && w.CommentId == commentId);
+
+        if (postLike == null)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public async Task<bool> IsSetCommunityPostLikeByUser(string userId, int communityId, int postId, int? commentId = null)
+    {
+        CommunityPostsLikes? postLike = await _context.CommunityPostsLikes
+            .FirstOrDefaultAsync(w => w.DefaultUserId == userId && w.CommunityId == communityId && w.PostId == postId && w.CommentId == commentId);
+
+        if (postLike == null)
+        {
+            return false;
+        }
+        return true;
     }
 }

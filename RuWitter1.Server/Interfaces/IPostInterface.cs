@@ -21,10 +21,14 @@ public interface IPostInterface
 
     Task<bool> DeleteLikeByCommunity(string userId, int communityId, int postId, int? commentId = null);
 
-    Task<IEnumerable<Post>?> GetPostsByNewsFeed(string userId);
+    Task<IEnumerable<Post>?> GetPostsByNewsFeed(string userId, int minLikes = 5);
 
     Task<bool> DeletePostWatches(string userId);
 
     Task<IEnumerable<Post>?> GetPostsBySearch(string userId, string postSubString,
-        string communityNameSubString, List<int> communityCategoryIds, DateTime dateTimeFrom, DateTime dateTimeTo);
+        string communityNameSubString, List<int> communityCategoryIds, DateTime dateTimeFrom, DateTime dateTimeTo, int minLikes = 5);
+
+    Task<bool> IsSetPostLikeByUser(string userId, int postId, int? commentId = null);
+
+    Task<bool> IsSetCommunityPostLikeByUser(string userId, int communityId, int postId, int? commentId = null);
 }

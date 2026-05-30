@@ -149,7 +149,7 @@ namespace RuWitter1.Server.Controllers
 
 
         // POST api/<PostController>/community/like/4
-        [HttpPost("/community/like/{postId}")]
+        [HttpPost("community/like/{postId}")]
         public async Task<IActionResult> SetLikeByCommunity(int postId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -390,6 +390,60 @@ namespace RuWitter1.Server.Controllers
 
             bool resultPostId = await _postService.DeleteLike(userId, postId, null);
             return Ok(resultPostId);
+        }
+
+        // POST api/<PostController>/issetlike
+        [HttpPost("issetlike")]
+        public async Task<bool> IsSetLike([FromForm] int postId, [FromForm] int? commentId) 
+        {
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return false;
+            }
+
+            Post? post = _postService.GetPostById(postId);
+            if (post == null || post.Id == 0)
+            {
+                return false;
+            }
+
+            bool hasCommunity = true;
+            bool hasComment = true;
+            Community? community = _communityService.GetCommunityById(post.CommunityId);
+            if (community == null || community.Id == 0) 
+            {
+                hasCommunity = false;
+            }
+
+            Comment? comment = await _commentService.GetCommentById(postId, commentId);
+            if (comment == null || comment.Id != commentId || comment.PostId != postId)
+            {
+                hasComment = false;
+            }
+
+            bool hasLike = false;
+            if (!hasCommunity && !hasComment) 
+            {
+                hasLike = await _postService.IsSetPostLikeByUser(userId, postId, null);
+                
+            }
+            if(hasCommunity && !hasComment) 
+            {
+                hasLike = await _postService.IsSetCommunityPostLikeByUser(userId, community.Id, postId, null);
+            }
+            if (!hasCommunity && hasComment)
+            {
+                hasLike = await _postService.IsSetPostLikeByUser(userId, postId, commentId);
+
+            }
+            if (hasCommunity && hasComment)
+            {
+                hasLike = await _postService.IsSetCommunityPostLikeByUser(userId, community.Id, postId, commentId);
+            }
+            return hasLike;
         }
     }
 }

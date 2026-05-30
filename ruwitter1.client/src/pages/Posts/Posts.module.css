@@ -9,8 +9,69 @@
     background-color: #EEE;
 }
 
-.posts {
+.post_container {
     position: fixed;
     height: calc(100% - 100px);
+    width: calc(100% - 330px);
     overflow-y: scroll;
+}
+
+.post
+{
+    position: relative;
+    width: 800px;
+    margin: 0 auto;
+    background-color: #FFF;
+    margin-bottom: 30px;
+    border-radius: 20px;
+}
+
+.post:last-child
+{
+    margin-bottom: 0px;
+}
+
+.post_content {
+    padding-top: 40px;
+    padding-bottom: 50px;
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+.avatar_name{
+    
+    height: 80px;
+    width: 600px;
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    height: 100%;
+    width: 80px;
+    border-radius: 50%;
+}
+
+.username{
+    margin-left: 30px;
+    font-size: 24px;
+    font-weight:600;
+}
+
+.post_body {
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.post_data {
+    text-align: right;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.post_btns{
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
 }
