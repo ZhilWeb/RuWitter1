@@ -11,7 +11,7 @@ public interface IDefaultUserInterface
     Task<DefaultUser?> GetUserByUsernameAsync(string username);
     Task<IdentityResult> UpdateUserAsync(DefaultUser user);
     Task<IdentityResult> DeleteUserAsync(string userId);
-    Task<IdentityResult> UpdatePersonalDataAsync(string userId, DefaultUserPersonalDataUpdate updatedUserData, IFormFile mediaFile);
+    Task<IdentityResult> UpdatePersonalDataAsync(string userId, DefaultUserPersonalDataUpdate updatedUserData);
     Task<IdentityResult> UpdateAvatarAsync(IFormFile mediaFile, string userId);
 
     Task<IEnumerable<DefaultUserPersonalDataUpdate>> GetAllUsersAsyncBySearch(string userId, string phoneNumber, string nickname, int ageFrom, int ageTo, string city, string interests);

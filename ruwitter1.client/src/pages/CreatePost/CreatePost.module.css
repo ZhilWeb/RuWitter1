@@ -1,0 +1,10 @@
+.post_main_container {
+    margin-top: 100px;
+    position: fixed;
+    height: calc(100% - 100px);
+    width: 100%;
+    background-color: #EEE;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

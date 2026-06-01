@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "../../App.css";
 import { usePosts } from "../../hooks/usePosts";
 import { useFetching } from "../../hooks/useFetching";
@@ -16,60 +16,46 @@ import { LoadingOutlined } from '@ant-design/icons';
 import HeaderRuW from "../../components/HeaderRuW/HeaderRuW";
 import ContentRuW from "../../components/ContentRuW/ContentRuW";
 import SidebarRuW from "../../components/SidebarRuW/SidebarRuW";
-import cl from "./Posts.module.css";
+import cl from "../Posts/Posts.module.css";
+import clid from "../PostIdPage/PostIdPage.module.css";
 // import { useNavigate } from "react-router";
 import AuthorizeView from "../../components/AuthorizeView";
 import PostItem from "../../components/PostItem";
+import UserProfileDescription from "../../components/UserProfileDescription";
+import DefaultUserPostList from "../../components/DefaultUserPostList";
 
-function Posts() {
 
+function DefaultUserProfile() {
+    const [user, setUser] = useState([]);
     const [posts, setPosts] = useState([]);
-    const [users, setUsers] = useState([]);
-    // const [lastPostId, setLastPostId] = useState(0);
-    const [filter, setFilter] = useState({ sort: '', query: '' });
-    const [modal, setModal] = useState(false);
     const [isLikeLoading, setIsLikeLoading] = useState(false);
-    // const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
-    const lastElement = useRef();
-    console.log(lastElement);
-    
-    // const [page, setPage] = useState(1);
-
 
     const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
         console.log(posts);
 
-        let postsPart = await PostService.getPosts();
-        
         // console.log(postsPart[0]);
-        let personDataPart = [];
-        let avatarDataPart = [];
+        const personData = await PostService.getCurrUserPersonalData();
+        let postsPart = await PostService.getCurrentUserPosts();
+        let avatar = await PostService.getAvatarById(personData.avatarId);
+        personData.avatar = avatar;
         let likesDataPart = [];
         for (let post of postsPart) {
-            const personData = await PostService.getCommunityById(post.communityId);
-            personDataPart.push(personData);
-            // console.log(personData);
-            const avatar = await PostService.getAvatarById(personData.avatarId);
-            // console.log(personData.avatar);
-            avatarDataPart.push(avatar);
             const hasLike = await PostService.isSetLikeByCurrentUser(post.id);
             likesDataPart.push(hasLike);
         }
-        
+
         for (let i = 0; i < postsPart.length; i++) {
-            postsPart[i].user = personDataPart[i];
-            postsPart[i].user.avatar = avatarDataPart[i];
+            postsPart[i].user = personData;
+            postsPart[i].user.avatar = avatar;
             postsPart[i].hasLike = likesDataPart[i];
         }
-
+        console.log(personData);
         console.log(postsPart);
 
-        setUsers(prevUsers => [...prevUsers, ...personDataPart]);
+        setUser(personData);
         setPosts(prevPosts => [...prevPosts, ...postsPart]);
         // setLastPostId(personDataPart[personDataPart.length - 1].id)
     });
-
-    useObserver(lastElement, posts.length > 0, isPostsLoading, fetchPosts);
 
 
     useEffect(() => {
@@ -77,14 +63,6 @@ function Posts() {
         fetchPosts();
     }, []);
 
-    
-
-
-    const removePost = (post) => {
-        setPosts(posts.filter(p => p.id !== post.id))
-    };
-
-    
 
     const handleLike = async (post) => {
         if (isLikeLoading) return;
@@ -93,13 +71,12 @@ function Posts() {
 
         const newHasLike = !post.hasLike;
         try {
-            if (post.hasLike) {
-                await PostService.deleteLikeByCommunity(post.id);
-            } else
-            {
-                await PostService.setLikeByCommunity(post.id);
+            if (post.hasLike && post.communityId == null) {
+                await PostService.deleteLike(post.id);
+            } else if (!post.hasLike && post.communityId == null) {
+                await PostService.setLike(post.id);
             }
-                
+
         }
         finally {
             setIsLikeLoading(false);
@@ -116,10 +93,11 @@ function Posts() {
         }
     };
 
-    // const changePage = (page) => {
-    //     setPage(page);
-    // };
-
+    const deletePost = async (postId) => {
+        await PostService.deletePostById(postId);
+        window.location.reload();
+    };
+    
     const { Header, Content, Footer, Sider } = Layout;
 
     const [isActiveSidebar, setActiveSidebar] = useState(false);
@@ -127,25 +105,38 @@ function Posts() {
     const ToggleSidebar = () => {
         setActiveSidebar(!isActiveSidebar);
     };
-
-    // let navigate = useNavigate();
-    return (
-            <Layout className={cl.App}>
+    if (!user && !posts[0].id) {
+        return (
+            <Layout>
                 <HeaderRuW activeSidebar={ToggleSidebar} />
-                <Layout className={cl.main_container}>
+                <Layout>
                     <SidebarRuW isActive={isActiveSidebar} />
                     <ContentRuW>
-                        {/*postError && <h1>Произошла ошибка ${postError}</h1>*/}
-                        <PostList posts={posts} lastElement={lastElement} isLikeLoading={isLikeLoading} handleLike={handleLike} />
-                        
-                        {isPostsLoading
-                            && <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}><LoadingOutlined /></div>
-                        }
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}><LoadingOutlined /></div>
                     </ContentRuW>
                 </Layout>
 
             </Layout>
+        );
+    }
+
+    
+    return (
+        <Layout className={cl.App}>
+            <HeaderRuW activeSidebar={ToggleSidebar} />
+            <Layout className={cl.main_container}>
+                <SidebarRuW isActive={isActiveSidebar} />
+                <ContentRuW>
+                    <div className={clid.post_comment_container}>
+                        {postError && <h1>Произошла ошибка ${postError}</h1>}
+                        <UserProfileDescription user={user} />
+                        <DefaultUserPostList posts={posts} isLikeLoading={isLikeLoading} handleLike={handleLike} deletePost={deletePost} />
+                    </div>
+                </ContentRuW>
+            </Layout>
+
+        </Layout>
     );
 }
 
-export default Posts;
+export default DefaultUserProfile;

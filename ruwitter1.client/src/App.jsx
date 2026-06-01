@@ -10,6 +10,10 @@ import PostIdPage from './pages/PostIdPage/PostIdPage';
 import HomePostIdPage from './pages/HomePostIdPage';
 import Chats from './pages/Chats/Chats';
 import ChatIdPage from './pages/ChatIdPage/ChatIdPage';
+import CreatePost from './pages/CreatePost/CreatePost';
+import DefaultUserProfile from './pages/DefaultUserProfile/DefaultUserProfile';
+import UpdateDefaultUserProfile from './pages/UpdateDefaultUserProfile/UpdateDefaultUserProfile';
+import UpdatePost from './pages/UpdatePost/UpdatePost';
 
 
 function App() {
@@ -18,6 +22,10 @@ function App() {
             <Routes>
                 <Route path="/chat" element={<AuthorizeView><ChatIdPage /></AuthorizeView>} />
                 <Route path="/chats" element={<AuthorizeView><Chats /></AuthorizeView>} />
+                <Route path="/changeprofile" element={<AuthorizeView><UpdateDefaultUserProfile /></AuthorizeView>} />
+                <Route path="/profile" element={<AuthorizeView><DefaultUserProfile /></AuthorizeView>} />
+                <Route path="/changepost" element={<AuthorizeView><UpdatePost /></AuthorizeView>} />
+                <Route path="/createpost" element={<AuthorizeView><CreatePost /></AuthorizeView>} />
                 <Route path="/post" element={<AuthorizeView><PostIdPage /></AuthorizeView>} />
                 <Route exact={true} path="/login" element={<Login />} />
                 <Route exact={true} path="/register" element={<Register />} />

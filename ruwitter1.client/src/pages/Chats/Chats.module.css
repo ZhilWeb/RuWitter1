@@ -1,0 +1,152 @@
+/* Контейнер всей страницы чатов */
+.chatsContainer {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Заголовок страницы */
+.pageTitle {
+    font-size: 24px;
+    font-weight: 700;
+    color: #141414;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 12px;
+}
+
+/* Индикатор загрузки */
+.loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px 0;
+    color: #1890ff;
+}
+
+/* Вывод ошибки */
+.error {
+    color: #ff4d4f;
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* Список-обертка для элементов чата */
+.chatList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Ссылка-контейнер для одного чата */
+.chatItem {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    background: #ffffff;
+    border-radius: 12px;
+    text-decoration: none !important;
+    color: inherit !important;
+    transition: all 0.2s ease;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+    /* Эффект наведения на чат */
+    .chatItem:hover {
+        background: #f5f7fa;
+        border-color: #e6f7ff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.05);
+    }
+
+/* Обертка для аватарки */
+.avatarWrapper {
+    margin-right: 16px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Стили самой картинки-аватара */
+.chatAvatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #e8e8e8;
+}
+
+/* Блок с текстовой информацией */
+.chatInfo {
+    flex: 1;
+    min-width: 0; /* Важно для работы text-overflow: ellipsis */
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Верхняя строка внутри чата (Имя + Время) */
+.chatHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Никнейм собеседника */
+.opponentName {
+    font-size: 16px;
+    font-weight: 600;
+    color: #262626;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Время последнего сообщения */
+.chatTime {
+    font-size: 12px;
+    color: #8c8c8c;
+    flex-shrink: 0;
+}
+
+/* Нижняя строка (Текст последнего сообщения) */
+.chatBody {
+    display: flex;
+    align-items: center;
+}
+
+/* Базовый стиль последнего сообщения */
+.lastMessage {
+    margin: 0;
+    font-size: 14px;
+    color: #595959;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* Стиль для непрочитанного сообщения (выделяется жирным) */
+.unread {
+    font-weight: 600;
+    color: #141414;
+}
+
+/* Если в диалоге еще нет сообщений */
+.emptyChat {
+    margin: 0;
+    font-size: 14px;
+    color: #bfbfbf;
+    font-style: italic;
+}
+
+
+.searchWrapper {
+    margin-bottom: 20px;
+}
+
+.searchInput {
+    border-radius: 8px !important;
+}

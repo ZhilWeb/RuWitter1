@@ -1,0 +1,28 @@
+.post_comment_container {
+    position: fixed;
+    height: calc(100% - 100px);
+    width: calc(100% - 330px);
+    overflow-y: scroll;
+}
+
+.comment_container{
+    width:100%;
+    display: flex;
+    flex-direction:column;
+    align-items: center;
+}
+
+.comment {
+    position: relative;
+    width: 800px;
+    background-color: #FFF;
+}
+
+
+hr {
+    margin: 0;
+}
+
+.comment:last-child > hr{
+    display: none;
+}

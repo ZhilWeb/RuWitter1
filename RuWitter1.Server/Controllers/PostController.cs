@@ -42,6 +42,21 @@ namespace RuWitter1.Server.Controllers
             return _postService.GetAllPosts(lastPostId);
         }
 
+        // POST: api/<PostController>/currentuserposts
+        [HttpGet("currentuserposts")]
+        public IEnumerable<Post>? GetCurrentUserPosts() 
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return [];
+            }
+
+            return _postService.GetPostsByUserId(userId);
+        }
+
+
         // GET api/<PostController>/post/5
         [HttpGet("post/{id}")]
         public Post? GetById(int id)
@@ -51,7 +66,7 @@ namespace RuWitter1.Server.Controllers
 
         // POST api/<PostController>
         [HttpPost]
-        public async Task<IActionResult> Post(string body, List<IFormFile> formFiles)
+        public async Task<IActionResult> Post([FromForm] string body, [FromForm] List<IFormFile> formFiles)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -81,15 +96,39 @@ namespace RuWitter1.Server.Controllers
         }
 
         // PUT api/<PostController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("{postId}")]
+        public async Task<IActionResult> Put(int postId, [FromForm] string body, [FromForm] List<IFormFile> formFiles)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            Post? post = _postService.GetPostById(postId);
+            if (post == null || post.Id == 0)
+            {
+                return NotFound();
+            }
+
+            await _postService.UpdatePost(post, body, formFiles);
+            return Ok(postId);
         }
 
         // DELETE api/<PostController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("{postId}")]
+        public async Task<IActionResult> Delete(int postId)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            bool resultDelete = await _postService.DeletePost(postId);
+            return Ok(resultDelete);
         }
 
 
@@ -175,7 +214,7 @@ namespace RuWitter1.Server.Controllers
         }
 
         // POST api/<PostController>/like/4
-        [HttpPost("/like/{postId}")]
+        [HttpPost("like/{postId}")]
         public async Task<IActionResult> SetLike(int postId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -192,7 +231,7 @@ namespace RuWitter1.Server.Controllers
 
             // не принадлежит обществу
             Community? community = _communityService.GetCommunityById(post.CommunityId);
-            if (community != null || community.Id != 0)
+            if (community != null)
             {
                 return NotFound();
             }
@@ -203,7 +242,7 @@ namespace RuWitter1.Server.Controllers
         }
 
         // POST api/<PostController>/community/like/4/5
-        [HttpPost("/community/like/{postId}/{commentId}")]
+        [HttpPost("community/like/{postId}/{commentId}")]
         public async Task<IActionResult> SetCommentLikeByCommunity(int postId, int commentId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -230,12 +269,12 @@ namespace RuWitter1.Server.Controllers
                 return NotFound();
             }
 
-            int resultPostId = await _postService.SetLikeByCommunity(userId, community.Id, postId, null);
+            int resultPostId = await _postService.SetLikeByCommunity(userId, community.Id, postId, commentId);
             return Ok(resultPostId);
         }
 
         // POST api/<PostController>/like/4
-        [HttpPost("/like/{postId}/{commentId}")]
+        [HttpPost("like/{postId}/{commentId}")]
         public async Task<IActionResult> SetCommentLike(int postId, int commentId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -252,7 +291,7 @@ namespace RuWitter1.Server.Controllers
 
             // не принадлежит обществу
             Community? community = _communityService.GetCommunityById(post.CommunityId);
-            if (community != null || community.Id != 0)
+            if (community != null)
             {
                 return NotFound();
             }
@@ -265,7 +304,7 @@ namespace RuWitter1.Server.Controllers
             }
 
 
-            int resultPostId = await _postService.SetLike(userId, postId, null);
+            int resultPostId = await _postService.SetLike(userId, postId, commentId);
             return Ok(resultPostId);
         }
 
@@ -315,7 +354,7 @@ namespace RuWitter1.Server.Controllers
 
             // не принадлежит обществу
             Community? community = _communityService.GetCommunityById(post.CommunityId);
-            if (community != null || community.Id != 0)
+            if (community != null)
             {
                 return NotFound();
             }
@@ -353,7 +392,7 @@ namespace RuWitter1.Server.Controllers
                 return NotFound();
             }
 
-            bool resultPostId = await _postService.DeleteLikeByCommunity(userId, community.Id, postId, null);
+            bool resultPostId = await _postService.DeleteLikeByCommunity(userId, community.Id, postId, commentId);
             return Ok(resultPostId);
         }
 
@@ -375,7 +414,7 @@ namespace RuWitter1.Server.Controllers
 
             // не принадлежит обществу
             Community? community = _communityService.GetCommunityById(post.CommunityId);
-            if (community != null || community.Id != 0)
+            if (community != null)
             {
                 return NotFound();
             }
@@ -388,7 +427,7 @@ namespace RuWitter1.Server.Controllers
             }
 
 
-            bool resultPostId = await _postService.DeleteLike(userId, postId, null);
+            bool resultPostId = await _postService.DeleteLike(userId, postId, commentId);
             return Ok(resultPostId);
         }
 

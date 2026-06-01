@@ -1,0 +1,247 @@
+
+
+/* Основное окно чата */
+.chatWindow {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 100px); /* Высота экрана минус высота хедера Ant Design */
+    background: #f0f2f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    width: 100%;
+}
+
+@media (min-width: 992px) {
+    .chatWindow {
+        width: calc(100% - 330px);
+    }
+}
+
+/* Лоадер на всю страницу */
+.mainLoader {
+    display: flex;
+    flex-content: center;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #1890ff;
+    font-size: 32px;
+}
+
+/* Шапка чата с информацией о собеседнике */
+.chatHeader {
+    display: flex;
+    align-items: center;
+    padding: 12px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #e8e8e8;
+    gap: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    z-index: 10;
+}
+
+.headerAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.headerName {
+    font-size: 16px;
+    font-weight: 600;
+    color: #141414;
+}
+
+/* Контейнер ленты сообщений (скроллируемый) */
+.messagesContainer {
+    flex: 1;
+    padding: 20px 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Строка сообщения */
+.messageRow {
+    display: flex;
+    width: 100%;
+}
+
+/* Сообщение текущего пользователя (справа) */
+.myMessageRow {
+    justify-content: flex-end;
+}
+
+/* Сообщение собеседника (слева) */
+.opponentMessageRow {
+    justify-content: flex-start;
+}
+
+/* Общее облачко сообщения */
+.messageBubble {
+    max-width: 60%;
+    padding: 10px 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Специфика облачка текущего пользователя */
+.myBubble {
+    background: #1DA1F2;
+    color: #ffffff;
+    border-radius: 16px 16px 4px 16px;
+}
+
+/* Специфика облачка оппонента */
+.opponentBubble {
+    background: #ffffff;
+    color: #1f1f1f;
+    border-radius: 16px 16px 16px 4px;
+    border: 1px solid #e8e8e8;
+}
+
+/* Имя отправителя (полезно для групповых чатов или ясности) */
+.senderName {
+    font-size: 12px;
+    font-weight: 600;
+    color: #8c8c8c;
+    margin-bottom: 4px;
+}
+
+/* Текст внутри сообщения */
+.messageText {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+/* Прикрепленная картинка в сообщении */
+.messageImage {
+    max-width: 100%;
+    max-height: 240px;
+    border-radius: 8px;
+    margin-top: 8px;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+/* Время отправки внутри облачка */
+.messageTime {
+    font-size: 10px;
+    align-self: flex-end;
+    margin-top: 4px;
+    opacity: 0.65;
+}
+
+/* Форма ввода (нижняя панель) */
+.inputForm {
+    display: flex;
+    padding: 14px 24px;
+    background: #ffffff;
+    border-top: 1px solid #e8e8e8;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Кнопка-скрепка прикрепления файла */
+.fileInputLabel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+    .fileInputLabel:hover {
+        background: #f5f5f5;
+    }
+
+/* Поле ввода текста */
+.textInput {
+    flex: 1;
+    border: 1px solid #d9d9d9;
+    padding: 9px 16px;
+    border-radius: 20px;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+    .textInput:focus {
+        border-color: #40a9ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+
+/* Кнопка «Отправить» */
+.sendButton {
+    background: #1890ff;
+    color: #ffffff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.sendButton:hover {
+    background: #40a9ff;
+}
+
+/* Плашка, показывающая имя прикрепленного файла над инпутом */
+.fileBadge {
+    padding: 6px 24px;
+    background: #e6f7ff;
+    font-size: 13px;
+    color: #1890ff;
+    border-top: 1px solid #bae7ff;
+    font-weight: 500;
+}
+
+/* Разделяем шапку на две части */
+.chatHeader {
+    display: flex;
+    justify-content: space-between; /* Выталкивает поиск вправо */
+    align-items: center;
+    padding: 12px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.messageSearchBox {
+    width: 250px;
+}
+/* Обертка для времени и корзины удаления */
+.messageFooter {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+}
+/* Иконка корзины */
+.deleteIcon {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.myBubble .deleteIcon:hover {
+    color: #ff4d4f; /* Красная при наведении в твоем облачке */
+}

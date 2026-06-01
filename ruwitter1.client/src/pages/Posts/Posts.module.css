@@ -75,3 +75,9 @@
     display: flex;
     justify-content: space-between;
 }
+
+.comment_container {
+    position: fixed;
+    height: calc(100% - 100px);
+    width: calc(100% - 330px);
+}

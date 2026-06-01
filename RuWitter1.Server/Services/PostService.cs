@@ -132,9 +132,59 @@ public class PostService : IPostInterface
         return;
     }
 
-    public Task DeletePost(int postId)
+    public async Task UpdatePost(Post post, string body, List<IFormFile> files)
     {
-        throw new NotImplementedException();
+        if(body == "") 
+        {
+            return;
+        }
+
+        post.Body = body;
+        if(post.MediaFiles != null) 
+        {
+            _context.MediaFiles.RemoveRange(post.MediaFiles);
+        }
+
+        List<MediaFile> mediaFiles = new List<MediaFile>();
+        foreach(var file in files) 
+        {
+            MediaFile? uploadFile = await _mediaFileService.InitMediaFile(file);
+            if (uploadFile == null)
+            {
+                return;
+            }
+            mediaFiles.Add(uploadFile);
+        }
+
+        if(mediaFiles.Count > 0) post.MediaFiles = mediaFiles;
+        _context.Entry(post).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+        return;
+    }
+
+    public async Task<bool> DeletePost(int postId)
+    {
+        // Загружаем пост СРАЗУ вместе со всеми его медиафайлами
+        Post? post = await _context.Posts
+            .Include(p => p.MediaFiles) // <- Подтягиваем связанные файлы
+            .FirstOrDefaultAsync(p => p.Id == postId);
+
+        if (post == null)
+        {
+            return false;
+        }
+
+        // Если у поста есть файлы, сначала удаляем их из контекста
+        if (post.MediaFiles != null && post.MediaFiles.Any())
+        {
+            _context.MediaFiles.RemoveRange(post.MediaFiles);
+        }
+
+        // Теперь спокойно удаляем сам пост
+        _context.Posts.Remove(post);
+
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     public IEnumerable<Post>? GetAllPosts(int lastPostId)
@@ -163,6 +213,17 @@ public class PostService : IPostInterface
             .OrderBy(p => p.Id)
             .Where(p => p.Id > lastPostId)
             .Take(10)
+            .AsNoTracking()
+            .ToList();
+    }
+
+
+    public IEnumerable<Post>? GetPostsByUserId(string userId) 
+    {
+        return _context.Posts
+            .Include(p => p.MediaFiles)
+            .OrderByDescending(p => p.PublicDate)
+            .Where(p => p.UserId == userId && p.CommunityId == null)
             .AsNoTracking()
             .ToList();
     }
@@ -302,10 +363,7 @@ public class PostService : IPostInterface
             .SingleOrDefault(p => p.Id == postId);
     }
 
-    public Task UpdatePost(Post post)
-    {
-        throw new NotImplementedException();
-    }
+    
 
     public async Task<int> SetLike(string userId, int postId, int? commentId = null) 
     {

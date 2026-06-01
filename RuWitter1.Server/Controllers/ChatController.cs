@@ -32,10 +32,15 @@ namespace RuWitter1.Server.Controllers
 
             if (string.IsNullOrEmpty(userId))
             {
-                throw new Exception("Unauthorized");
+                return [];
             }
 
-            DefaultUser currentUser = await _userManager.FindByIdAsync(userId);
+            DefaultUser? currentUser = await _userManager.FindByIdAsync(userId);
+
+            if (currentUser == null) 
+            {
+                return [];
+            }
 
 
             return _chatService.GetAllChatsByUser(currentUser);

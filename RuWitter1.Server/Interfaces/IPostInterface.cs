@@ -6,9 +6,11 @@ public interface IPostInterface
 {
     IEnumerable<Post>? GetAllPosts(int lastPostId);
     Post? GetPostById(int postId);
+
+    IEnumerable<Post>? GetPostsByUserId(string userId);
     Task CreatePost(string existingUserId, string body, List<IFormFile> files);
-    Task UpdatePost(Post post);
-    Task DeletePost(int postId);
+    Task UpdatePost(Post post, string body, List<IFormFile> files);
+    Task<bool> DeletePost(int postId);
     int GetCountOfPosts();
 
     Task CreatePostByCommunity(string existingUserId, int communityId, string body, List<IFormFile> files);

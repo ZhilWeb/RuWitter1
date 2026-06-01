@@ -1,186 +1,208 @@
-﻿import React, { useEffect, useState } from "react";
-import "../../App.css";
-import { usePosts } from "../../hooks/usePosts";
-import { useFetching } from "../../hooks/useFetching";
-import PostService from "../../API/PostService";
-import { getPageCount } from "../../utils/pages";
-import MyButton from "../../components/UI/button/MyButton";
-import MyModal from "../../components/UI/MyModal/MyModal";
-import PostForm from "../../components/PostForm";
-import PostFilter from "../../components/PostFilter";
-import PostList from "../../components/PostList";
-import Pagination from "../../components/UI/pagination/Pagination";
-import { useObserver } from "../../hooks/useObserver";
-import { Layout } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
+﻿import React, { useEffect, useState, useRef, useMemo } from "react";
+import { Layout, Avatar, Input } from "antd";
+import { UserOutlined, LoadingOutlined, PaperClipOutlined, SearchOutlined, DeleteOutlined } from '@ant-design/icons';
 import HeaderRuW from "../../components/HeaderRuW/HeaderRuW";
 import ContentRuW from "../../components/ContentRuW/ContentRuW";
 import SidebarRuW from "../../components/SidebarRuW/SidebarRuW";
-import { useParams } from 'react-router';
-import { Avatar } from "antd";
-import { UserOutlined } from '@ant-design/icons';
-
-// import cl from "./Posts.module.css";
+import PostService from "../../API/PostService";
+import { useFetching } from "../../hooks/useFetching";
+import cl from "./ChatIdPage.module.css";
+import clposts from "../Posts/Posts.module.css";
 
 function ChatIdPage() {
-    let params = new URLSearchParams(window.location.search);
-    let chatId = params.get('id');
-    console.log(chatId);
-    const [chat, setChat] = useState({});
-    // const [attempts, setAttempts] = useState(0);
-    /*
-    const [fetchPostById, isLoading, error] = useFetching(async (postId) => {
-        const post = await PostService.getPostById(postId);
-        console.log(post);
-        const postPersonData = await PostService.getPersonalDataById(post.userId);
-        console.log(postPersonData);
-        const avatarPost = await PostService.getAvatarById(postPersonData.avatarId);
-        console.log(avatarPost);
-        post.user = postPersonData;
-        post.user.avatar = avatarPost;
-        setPost(post);
+    const params = new URLSearchParams(window.location.search);
+    const chatId = params.get('id');
 
-        
-    });
-    */
-    const [currUserId, setCurrUserId] = useState({});
-    const [anotherUser, setAnotherUser] = useState({});
-    /*
-    const [lastPostId, setLastPostId] = useState(0);
-
-    const [totalCount, setTotalCount] = useState(0);
-    const limit = 10;
-    const [totalPages, setTotalPages] = useState(0);
-
-    const [page, setPage] = useState(1);
-    */
-
-    // const [fetchComments, isComLoading, comError] = useFetching();
-
-    useEffect(() => {
-        console.log("ef");
-        const fetchChats = async (chatId) => {
-            const currUserId = await PostService.getCurrUser();
-            setCurrUserId(currUserId);
-
-            let chat = await PostService.getChatById(chatId);
-            let messagesWithFiles = await PostService.getMessagesByChatId(chat.id);
-            if (chat.messages.length > 0) {
-                for (let i = 0; i < chat.messages.length; i++) {
-                    chat.messages[i].mediaFiles = messagesWithFiles[i].mediaFiles;
-                }
-            }
-            let anotherUser = {};
-            let newChat = {};
-            // console.log(postsPart[0]);
-            for (let user of chat.users) {
-                if (user.id !== currUserId) {
-                    if (user.avatarId !== null) {
-                        const avatar = await PostService.getAvatarById(user.avatarId);
-                        console.log(avatar);
-                        user.avatar = avatar;
-                    }
-
-                    anotherUser = user;
-                    newChat.id = chat.id;
-                    newChat.user = user;
-                    newChat.messages = chat.messages;
-                }
-            }
-            
-            setAnotherUser(anotherUser);
-            setChat(newChat);
-        };
-
-        fetchChats(chatId);
-    }, []);
-
-    /*
-    const createPost = (newPost) => {
-        setPosts([...posts, newPost])
-        setModal(false)
-    };
-
-
-    const removePost = (post) => {
-        setPosts(posts.filter(p => p.id !== post.id))
-    };
-
-    const changePage = (page) => {
-        setPage(page);
-    };
-    */
-
-    const { Header, Content, Footer, Sider } = Layout;
-
+    const [currentUser, setCurrentUser] = useState([]);
+    const [chat, setChat] = useState(null);
+    const [content, setContent] = useState("");
+    const [file, setFile] = useState(null);
+    const [messageSearch, setMessageSearch] = useState(""); // Строка поиска сообщений
     const [isActiveSidebar, setActiveSidebar] = useState(false);
 
-    const ToggleSidebar = () => {
-        setActiveSidebar(!isActiveSidebar);
-    };
+    const messagesEndRef = useRef(null);
 
-    
-    console.log(chat);
-    console.log(anotherUser);
-    console.log(currUserId);
+    const [fetchChat, isLoading, error] = useFetching(async (id) => {
+        const currUser = await PostService.getCurrUserPersonalData();
+        
+        // 1. Получаем базовую инфо о чате
+        const currentChat = await PostService.getChatById(id);
+        // console.log(currentChat);
+        // 2. Получаем список сообщений
+        const chatMes = await PostService.getMessagesByChatId(id);
+        
+        
+        // Определение оппонента
+        const opponentId = currentChat.users[0].id === currUser.userId ? currentChat.users[1].id : currentChat.users[0].id;
+        const opponentData = await PostService.getPersonalDataById(opponentId);
 
-    const [content, setContent] = useState('');
-    const [file, setFile] = useState(null);
-    const [messageId, setMessageId] = useState('');
-    const [fileInfo, setFileInfo] = useState(null);
+        if (opponentData && opponentData.avatarId) {
+            opponentData.avatar = await PostService.getAvatarById(opponentData.avatarId);
+        }
+
+        // Собираем авторов и файлы для каждого сообщения
+        for (let mes of chatMes) {
+            // mes.mediaFiles = await PostService.getMediaFilesByMessageId(mes.id);
+            mes.user = await PostService.getPersonalDataById(mes.userId);
+        }
+        currentChat.user = opponentData;
+        // Переворачиваем, чтобы старые сообщения были сверху, а новые снизу
+        currentChat.messages = chatMes.reverse();
+
+        console.log(currentChat);
+        setCurrentUser(currUser);
+        setChat(currentChat);
+    });
+
+    // Следим за изменением ID чата в строке браузера
+    useEffect(() => {
+        if (chatId) {
+            fetchChat(chatId);
+        }
+    }, [chatId]);
+
+    // Скролл вниз при появлении чата или новых сообщений
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [chat?.messages]);
+
+    // Фильтрация сообщений по подстроке
+    const filteredMessages = useMemo(() => {
+        if (!chat?.messages) return [];
+        return chat.messages.filter(msg =>
+            msg.body?.toLowerCase().includes(messageSearch.toLowerCase())
+        );
+    }, [chat?.messages, messageSearch]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(content);
-        console.log(file);
-        console.log(chat.id);
-        const result = await PostService.sendMessageWithFile(content, file, chat.id);
-        // setMessageId(result.id);
-        alert('Message with file saved successfully!');
+        if (!content.trim() && !file) return;
+
+        try {
+            // Используем твой метод отправки FormData
+            await PostService.sendMessageWithFile(chatId, content, file);
+            setContent("");
+            setFile(null);
+            // Мгновенно обновляем чат
+            fetchChat(chatId);
+        } catch (err) {
+            console.error("Не удалось отправить сообщение:", err);
+        }
     };
 
+    // Функция удаления сообщения
+    const handleDeleteMessage = async (messageId) => {
+        if (window.confirm("Вы уверены, что хотите удалить это сообщение?")) {
+            try {
+                await PostService.deleteMessageById(messageId);
+                // Локально обновляем стейт, чтобы мгновенно убрать сообщение без перезагрузки всей страницы
+                setChat(prevChat => ({
+                    ...prevChat,
+                    messages: prevChat.messages.filter(m => m.id !== messageId)
+                }));
+            } catch (err) {
+                alert("Не удалось удалить сообщение");
+            }
+        }
+    };
+
+    const ToggleSidebar = () => setActiveSidebar(!isActiveSidebar);
+
     return (
-        <Layout>
+        <Layout style={{ minHeight: "100vh" }}>
             <HeaderRuW activeSidebar={ToggleSidebar} />
-            <Layout>
+            <Layout className={clposts.main_container}>
                 <SidebarRuW isActive={isActiveSidebar} />
                 <ContentRuW>
-                    <h1>Вы открыли страницу чата с ID={chatId}</h1>
-                    {chat.id !== undefined &&
-                        <div>
-                            <img src={`data:${chat.user.avatar.contentType};base64,${chat.user.avatar.data}`} height="400px" />
-                            <strong>{chat.user.nickname}</strong>
-                            {chat.messages.map(chatMes =>
-                                <div key={chatMes.id}>
+                    <div className={cl.chatWindow}>
+                        {isLoading && !chat && <div className={cl.mainLoader}><LoadingOutlined style={{ fontSize: 40 }} /></div>}
+                        {error && <h3 className={cl.error}>Ошибка: {error}</h3>}
 
-                                    <strong>{chatMes.user.nickname}</strong>
-                                    <p >{chatMes.body}. {chatMes.publicDate}</p>
-                                    {chatMes.mediaFiles.map(mediaFile =>
-                                        <img src={`data:${mediaFile.contentType};base64,${mediaFile.data}`} height="100px" key={mediaFile.id} />
-                                    )}
+                        {chat && (
+                            <>
+                                {/* Шапка текущего диалога */}
+                                <div className={cl.chatHeader}>
+                                    <div className={cl.userInfo}>
+                                        {chat.user?.avatar?.data ? (
+                                            <img src={`data:${chat.user.avatar.contentType};base64,${chat.user.avatar.data}`} className={cl.headerAvatar} alt="" />
+                                        ) : (
+                                            <Avatar size={40} icon={<UserOutlined />} />
+                                        )}
+                                        <strong className={cl.headerName}>{chat.user?.nickname || "Пользователь"}</strong>
+                                    </div>
+
+                                    {/* Маленький инпут поиска внутри чата */}
+                                    <div className={cl.messageSearchBox}>
+                                        <Input
+                                            placeholder="Поиск по сообщениям..."
+                                            prefix={<SearchOutlined />}
+                                            value={messageSearch}
+                                            onChange={(e) => setMessageSearch(e.target.value)}
+                                            size="small"
+                                            allowClear
+                                        />
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-                    }
 
-                    <h2>Send Message with Attachment</h2>
-                    <form onSubmit={handleSubmit}>
-                        <textarea
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            placeholder="Enter your message"
-                            required
-                        />
-                        <input
-                            type="file"
-                            onChange={(e) => setFile(e.target.files[0])}
-                        />
-                        <button type="submit">Encrypt and Save</button>
-                    </form>
-                    
+                                {/* Лента сообщений */}
+                                <div className={cl.messagesContainer}>
+                                    {filteredMessages.map(msg => {
+                                        const isMe = msg.userId === currentUser.userId;
+                                        return (
+                                            <div key={msg.id} className={`${cl.messageRow} ${isMe ? cl.myMessageRow : cl.opponentMessageRow}`}>
+                                                <div className={`${cl.messageBubble} ${isMe ? cl.myBubble : cl.opponentBubble}`}>
+                                                    {!isMe && <span className={cl.senderName}>{msg.user?.nickname}</span>}
+
+                                                    <p className={cl.messageText}>{msg.body}</p>
+
+                                                    {msg.mediaFiles?.map(media => (
+                                                        <img src={`data:${media.contentType};base64,${media.data}`} className={cl.messageImage} key={media.id} alt="" />
+                                                    ))}
+
+                                                    <div className={cl.messageFooter}>
+                                                        {/* Кнопка удаления рендерится ТОЛЬКО для твоих сообщений */}
+                                                        {isMe && (
+                                                            <DeleteOutlined
+                                                                className={cl.deleteIcon}
+                                                                onClick={() => handleDeleteMessage(msg.id)}
+                                                            />
+                                                        )}
+                                                        <span className={cl.messageTime}>
+                                                            {new Date(msg.publicDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    <div ref={messagesEndRef} />
+                                </div>
+
+                                {/* Нижняя панель отправки */}
+                                <form onSubmit={handleSubmit} className={cl.inputForm}>
+                                    <input
+                                        type="text"
+                                        value={content}
+                                        onChange={(e) => setContent(e.target.value)}
+                                        placeholder="Напишите сообщение..."
+                                        className={cl.textInput}
+                                    />
+                                    <label className={cl.fileInputLabel}>
+                                        <PaperClipOutlined style={{ fontSize: 20, cursor: 'pointer', color: file ? '#1890ff' : '#888' }} />
+                                        <input
+                                            type="file"
+                                            onChange={(e) => setFile(e.target.files[0])}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </label>
+                                    <button type="submit" className={cl.sendButton}>Отправить</button>
+                                </form>
+                                {file && <div className={cl.fileBadge}>Прикреплен файл: {file.name}</div>}
+                            </>
+                        )}
+                    </div>
                 </ContentRuW>
             </Layout>
-
         </Layout>
     );
 }

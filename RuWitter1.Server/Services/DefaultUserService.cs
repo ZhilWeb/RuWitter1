@@ -86,7 +86,7 @@ public class DefaultUserService : IDefaultUserInterface
         return await _userManager.FindByIdAsync(userId);
     }
 
-    public async Task<IdentityResult> UpdatePersonalDataAsync(string userId, DefaultUserPersonalDataUpdate updatedUserData, IFormFile iFormFile)
+    public async Task<IdentityResult> UpdatePersonalDataAsync(string userId, DefaultUserPersonalDataUpdate updatedUserData)
     {
         updatedUserData.UserId = userId;
         var existingUser = await _userManager.FindByIdAsync(userId);
@@ -107,8 +107,12 @@ public class DefaultUserService : IDefaultUserInterface
         {
             bool result = await _mediaFileService.Delete((int)existingUser.AvatarId);
         }
-        MediaFile? mediaFile = await _mediaFileService.InitMediaFile(iFormFile);
-        existingUser.Avatar = mediaFile;
+        if(updatedUserData.Avatar != null) 
+        {
+            MediaFile? mediaFile = await _mediaFileService.InitMediaFile(updatedUserData.Avatar);
+            existingUser.Avatar = mediaFile;
+        }
+        
 
         return await _userManager.UpdateAsync(existingUser);
     }

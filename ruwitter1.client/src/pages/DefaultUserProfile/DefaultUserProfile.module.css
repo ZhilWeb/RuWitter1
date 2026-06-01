@@ -1,0 +1,92 @@
+.user_description_container {
+    position: relative;
+    width: 800px;
+    margin: 0 auto;
+    background-color: #FFF;
+    margin-bottom: 30px;
+}
+
+.avatar_name {
+    height: 120px;
+    width: 600px;
+    display: flex;
+    align-items: center;
+}
+
+
+.avatar {
+    height: 100%;
+    width: 120px;
+    border-radius: 50%;
+}
+
+.description_body {
+    margin-top: 30px;
+    font-size: 22px;
+    font-weight: 400;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content:space-between;
+    font-weight: 600;
+}
+
+.description_body > .simple_discription{
+    display: flex;
+}
+
+.description_body > .simple_discription > p{
+    margin-left: 10px;
+}
+
+.description_body > div > p{
+    font-weight: 400;
+}
+
+
+.post_container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.posts_title {
+    width: 800px;
+    height: 60px;
+    text-align: left;
+    font-family: "Roboto", sans-serif;
+    font-size: 28px;
+    background-color: #FFF;
+    padding-left: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.post {
+    position: relative;
+    width: 800px;
+    background-color: #FFF;
+}
+
+hr {
+    margin: 0;
+}
+
+.post:last-child > hr {
+    display: none;
+}
+
+.post_btns {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: right;
+}
+
+
+.change_profile {
+    margin-left: 10px;
+    font-size: 24px;
+    font-weight: 600;
+}

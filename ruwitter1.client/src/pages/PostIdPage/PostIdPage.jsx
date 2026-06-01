@@ -19,6 +19,9 @@ import ContentRuW from "../../components/ContentRuW/ContentRuW";
 import SidebarRuW from "../../components/SidebarRuW/SidebarRuW";
 import { useParams } from 'react-router';
 import cl from "../Posts/Posts.module.css";
+import clid from "./PostIdPage.module.css";
+import CommentList from "../../components/CommentList";
+import CommentForm from "../../components/CommentForm";
 // import cl from "./Posts.module.css";
 
 function PostIdPage() {
@@ -45,6 +48,7 @@ function PostIdPage() {
     const [comments, setComments] = useState([]);
     const [users, setUsers] = useState([]);
     const [isPostLikeLoading, setIsPostLikeLoading] = useState(false);
+    const [isCommentLikeLoading, setIsCommentLikeLoading] = useState(false);
     /*
     const [lastPostId, setLastPostId] = useState(0);
 
@@ -87,17 +91,20 @@ function PostIdPage() {
             // console.log(postsPart[0]);
             let personDataPart = [];
             let avatarDataPart = [];
+            let likesDataPart = [];
             for (let comment of commentsPart) {
                 const personData = await PostService.getPersonalDataById(comment.userId);
                 personDataPart.push(personData);
                 const avatar = await PostService.getAvatarById(personData.avatarId);
                 avatarDataPart.push(avatar);
+                const hasLike = await PostService.isSetLikeByCurrentUser(postId, comment.id);
+                likesDataPart.push(hasLike);
             }
 
             for (let i = 0; i < commentsPart.length; i++) {
                 commentsPart[i].user = personDataPart[i];
                 commentsPart[i].user.avatar = avatarDataPart[i];
-
+                commentsPart[i].hasLike = likesDataPart[i];
             }
             console.log(commentsPart);
 
@@ -145,6 +152,10 @@ function PostIdPage() {
                 await PostService.deleteLikeByCommunity(rendPost.id);
             } else if (!rendPost.hasLike && rendPost.communityId != null) {
                 await PostService.setLikeByCommunity(rendPost.id);
+            } else if (rendPost.hasLike && rendPost.communityId == null) {
+                await PostService.deleteLike(rendPost.id);
+            } else if (!rendPost.hasLike && rendPost.communityId == null) {
+                await PostService.setLike(rendPost.id);
             }
 
         }
@@ -155,6 +166,44 @@ function PostIdPage() {
                 hasLike: newHasLike,
             });
         }
+    };
+
+    const handleCommentLike = async (comment) => {
+        if (isCommentLikeLoading) return;
+
+        setIsCommentLikeLoading(true);
+
+        const newHasLike = !comment.hasLike;
+        try {
+            if (comment.hasLike && post.communityId != null) {
+                await PostService.deleteCommentLikeByCommunity(post.id, comment.id);
+            } else if (!comment.hasLike && post.communityId != null) {
+                await PostService.setCommentLikeByCommunity(post.id, comment.id);
+            } else if (comment.hasLike && post.communityId == null) {
+                await PostService.deleteCommentLike(post.id, comment.id);
+            } else if (!comment.hasLike && post.communityId == null) {
+                await PostService.setCommentLike(post.id, comment.id);
+            }
+
+        }
+        finally {
+            setIsCommentLikeLoading(false);
+            setComments(comments =>
+                comments.map(rendComment =>
+                    rendComment.id === comment.id
+                        ? {
+                            ...rendComment,
+                            hasLike: newHasLike,
+                        }
+                        : rendComment
+                )
+            );
+        }
+    };
+
+    const createComment = async (newComment) => {
+        await PostService.createComment(post.id, newComment.body, newComment.files);
+        window.location.reload();
     };
 
     if (!post.id || !post.user)
@@ -179,25 +228,11 @@ function PostIdPage() {
                 <Layout className={cl.main_container}>
                     <SidebarRuW isActive={isActiveSidebar} />
                     <ContentRuW>
-                        <div className={cl.post_container}>
+                        <div className={clid.post_comment_container }>
                             <PostItem post={post} isLikeLoading={isPostLikeLoading} handleLike={handlePostLike} disableCommentLink={true} />
-                            {post.id !== undefined &&
-                                <div>
-                                    {comments.map(comment =>
-                                        <div key={comment.id} >
-                                            <img src={`data:${comment.user.avatar.contentType};base64,${comment.user.avatar.data}`} height="400px" />
-                                            <strong>{comment.user.nickname}. {comment.publicDate}</strong>
-                                            <br></br>
-                                            <p>{comment.body}</p>
-                                            {comment.mediaFiles.map((mediaFile) =>
-                                                <img src={`data:${mediaFile.contentType};base64,${mediaFile.data}`} height="400px" key={mediaFile.id} />
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            } 
-                        </div>
-                         
+                            <CommentForm create={createComment} />
+                            <CommentList comments={comments} isLikeLoading={isCommentLikeLoading} handleLike={handleCommentLike} />
+                        </div>  
                     </ContentRuW>
                 </Layout>
 

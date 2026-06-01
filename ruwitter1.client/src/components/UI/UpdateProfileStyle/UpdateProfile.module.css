@@ -1,0 +1,9 @@
+.profile_inputs {
+    margin: 0 auto;
+    background: #FFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    height: 600px;
+}

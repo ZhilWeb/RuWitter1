@@ -91,6 +91,39 @@ namespace RuWitter1.Server.Controllers
             return Ok(personalData);
         }
 
+        // GET api/<DefaultUserController>/currentuserpersonaldata
+        [HttpGet("currentuserpersonaldata")]
+        public async Task<IActionResult> GetCurrentUserPersonalData()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            DefaultUser? user = await _defaultUserService.GetUserByIdAsync(userId);
+
+            if(user == null) 
+            {
+                return NotFound();
+            }
+
+            // возвращаем общедоступные персональные данные
+            var personalData = new DefaultUserPersonalDataUpdate
+            {
+                UserId = user.Id,
+                Nickname = user.Nickname,
+                Age = user.Age,
+                BriefInformation = user.BriefInformation,
+                City = user.City,
+                Interests = user.Interests,
+                AvatarId = user.AvatarId,
+                PhoneNumber = user.PhoneNumber == null ? "" : user.PhoneNumber
+            };
+
+            return Ok(personalData);
+        }
+
 
         // GET api/<DefaultUserController>/user
         [HttpGet("user")]
@@ -135,9 +168,9 @@ namespace RuWitter1.Server.Controllers
             return NoContent();
         }
 
-        // PUT api/<DefaultUserController>/personaldata/5
-        [HttpPut("personaldata/{id}")]
-        public async Task<IActionResult> UpdatePersonalData([FromForm] DefaultUserPersonalDataUpdate updatedUserData, IFormFile avatar)
+        // PUT api/<DefaultUserController>/personaldata
+        [HttpPut("personaldata")]
+        public async Task<IActionResult> UpdatePersonalData([FromForm] DefaultUserPersonalDataUpdate updatedUserData)
         {
             if(updatedUserData == null) 
             {
@@ -150,7 +183,7 @@ namespace RuWitter1.Server.Controllers
                 return Unauthorized();
             }
 
-            var result = await _defaultUserService.UpdatePersonalDataAsync(userId, updatedUserData, avatar);
+            var result = await _defaultUserService.UpdatePersonalDataAsync(userId, updatedUserData);
             if (!result.Succeeded)
             {
                 return BadRequest(result.Errors);

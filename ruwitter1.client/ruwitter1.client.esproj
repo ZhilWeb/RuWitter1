@@ -8,4 +8,12 @@
     <!-- Folder where production build objects will be placed -->
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="src\components\UI\CommentFormStyle\" />
+    <Folder Include="src\components\UI\PostFormStyle\" />
+    <Folder Include="src\components\UI\UpdateProfileStyle\" />
+    <Folder Include="src\pages\CreatePost\" />
+    <Folder Include="src\pages\UpdateDefaultUserProfile\" />
+    <Folder Include="src\pages\UpdatePost\" />
+  </ItemGroup>
 </Project>

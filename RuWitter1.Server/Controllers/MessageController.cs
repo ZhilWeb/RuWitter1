@@ -1,10 +1,11 @@
-﻿using System.Security.Claims;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RuWitter1.Server.Interfaces;
 using RuWitter1.Server.Models;
+using System.Security.Claims;
+using System.Security.Cryptography;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -28,27 +29,22 @@ namespace RuWitter1.Server.Controllers
 
         // GET: api/<MessageController>/1
         [HttpGet("{chatId}")]
-        public async Task<IEnumerable<Message>?> Get(int chatId)
+        public List<Message> Get(int chatId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
             {
-                throw new Exception("Unauthorized");
+                return [];
             }
 
-            DefaultUser? currentUser = await _userManager.FindByIdAsync(userId);
+            
 
-            if (currentUser == null) 
-            {
-                throw new Exception("Current user has not found.");
-            }
-
-            IEnumerable<Message>? messages = await _messageService.GetAllMessageByChat(currentUser, chatId);
+            List<Message>? messages = _messageService.GetAllMessageByChat(userId, chatId);
 
             if (messages == null) 
             {
-                throw new Exception("Message has not found.");
+                return [];
             }
             /*
             foreach(var message in messages) 
@@ -63,7 +59,14 @@ namespace RuWitter1.Server.Controllers
                 message.Body = System.Text.Encoding.UTF8.GetString(decryptedBody);
             }
             */
-
+            if(messages[0].MediaFiles != null) 
+            {
+                foreach (var file in messages[0].MediaFiles)
+                {
+                    Console.WriteLine(file.ContentType);
+                }
+            }
+            
             return messages;
         }
 
@@ -89,18 +92,15 @@ namespace RuWitter1.Server.Controllers
         }
 
         // POST api/<MessageController>/1
-        [HttpPost("{chatId}")]
-        public async Task<IActionResult> Post(MessageDTO dto)
+        [HttpPost]
+        public async Task<IActionResult> Post([FromForm] int chatId, [FromForm] string? content, [FromForm] List<IFormFile> files)
         {
             // string body, int chatId, List<IFormFile> formFiles
 
-            int chatId = dto.chatId;
-            string? body = dto.Content;
-            List<IFormFile> formFiles = new List<IFormFile>();
-            if (dto.File != null) 
-            {
-                formFiles.Add(dto.File);
-            }
+            string? body = content;
+            Console.WriteLine(chatId);
+            Console.WriteLine(body);
+            List<IFormFile> formFiles = files;
             
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -153,9 +153,18 @@ namespace RuWitter1.Server.Controllers
         }
 
         // DELETE api/<MessageController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("{messageId}")]
+        public async Task<IActionResult> Delete(int messageId)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            bool deleteResult = await _messageService.DeleteMessage(userId, messageId);
+
+            return Ok(deleteResult);
         }
     }
 }

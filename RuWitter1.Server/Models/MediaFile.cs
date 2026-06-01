@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 namespace RuWitter1.Server.Models;
@@ -35,8 +36,13 @@ public class MediaFile
     [JsonIgnore]
     public Comment? Comments { get; set; }
 
+    public int? MessageId { get; set; }
+
+    [ForeignKey("MessageId")]
     [JsonIgnore]
-    public Message? Messages { get; set; }
+    public Message? Message { get; set; }
+
+    
 
     [JsonIgnore]
     public Community? Communities { get; set; }

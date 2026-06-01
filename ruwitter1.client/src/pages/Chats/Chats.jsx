@@ -1,98 +1,111 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from "react";
-import "../../App.css";
-import { usePosts } from "../../hooks/usePosts";
-import { useFetching } from "../../hooks/useFetching";
-import PostService from "../../API/PostService";
-import { getPageCount } from "../../utils/pages";
-import MyButton from "../../components/UI/button/MyButton";
-import MyModal from "../../components/UI/MyModal/MyModal";
-import PostForm from "../../components/PostForm";
-import PostFilter from "../../components/PostFilter";
-import PostList from "../../components/PostList";
-import Pagination from "../../components/UI/pagination/Pagination";
-import { useObserver } from "../../hooks/useObserver";
-import { Layout } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
+﻿import React, { useEffect, useState, useMemo } from "react";
+import { Layout, Avatar, Input } from "antd";
+import { UserOutlined, LoadingOutlined, SearchOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 import HeaderRuW from "../../components/HeaderRuW/HeaderRuW";
 import ContentRuW from "../../components/ContentRuW/ContentRuW";
 import SidebarRuW from "../../components/SidebarRuW/SidebarRuW";
-// import cl from "./Posts.module.css";
-// import { useNavigate } from "react-router";
-import AuthorizeView from "../../components/AuthorizeView";
-import { Avatar } from "antd";
-import { UserOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import PostService from "../../API/PostService";
+import { useFetching } from "../../hooks/useFetching";
+import cl from "./Chats.module.css";
+import clposts from "../Posts/Posts.module.css";
 
 function Chats() {
-
     const [chats, setChats] = useState([]);
-    const [users, setUsers] = useState([]);
+    const [isActiveSidebar, setActiveSidebar] = useState(false);
+    const [searchQuery, setSearchQuery] = useState(""); // Состояние для строки поиска
 
+    // Используем изолированный метод сервиса
+    const [fetchChats, isLoading, error] = useFetching(async () => {
+        const enrichedChats = await PostService.getFullChatsList();
+        setChats(enrichedChats);
+    });
+
+    // Функция фильтрации чатов (вычисляется при изменении списка чатов или строки поиска)
+    const filteredChats = useMemo(() => {
+        return chats.filter(chat =>
+            chat.user?.nickname?.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [chats, searchQuery]);
 
     useEffect(() => {
-        console.log("ef");
-        const fetchChats = async () => {
-            const currUserId = await PostService.getCurrUser();
-
-            let chatsPart = await PostService.getChats();
-            let usersPart = [];
-            let chatsForm = [];
-            // console.log(postsPart[0]);
-            for (let chat of chatsPart) {
-                let newChat = {};
-                for (let user of chat.users)
-                {
-                    if (user.id !== currUserId)
-                    {
-                        if (user.avatarId !== null)
-                        {
-                            const avatar = await PostService.getAvatarById(user.avatarId);
-                            console.log(avatar);
-                            user.avatar = avatar;
-                        }
-                        
-                        usersPart.push(user);
-                        newChat.id = chat.id;
-                        newChat.user = user;
-                        newChat.messages = chat.messages;
-                        chatsForm.push(newChat);
-                    }
-                }
-            }
-            setUsers(usersPart);
-            setChats(chatsForm);
-        };
-
         fetchChats();
     }, []);
 
-    const { Header, Content, Footer, Sider } = Layout;
-
-    const [isActiveSidebar, setActiveSidebar] = useState(false);
-
-    const ToggleSidebar = () => {
-        setActiveSidebar(!isActiveSidebar);
-    };
-    console.log(users);
+    const ToggleSidebar = () => setActiveSidebar(!isActiveSidebar);
     console.log(chats);
-    // let navigate = useNavigate();
     return (
-        <Layout>
+        <Layout style={{ minHeight: "100vh" }}>
             <HeaderRuW activeSidebar={ToggleSidebar} />
-            <Layout>
+            <Layout className={clposts.main_container}>
                 <SidebarRuW isActive={isActiveSidebar} />
                 <ContentRuW>
-                    {chats.map(chat =>
-                        <div key={chat.id}>
-                            <p>{chat.id}</p>
-                            {chat.user.avatarId !== null ? <img src={`data:${chat.user.avatar.contentType};base64,${chat.user.avatar.data}`} height="400px" /> : <Avatar size={50} icon={<UserOutlined />} />}
-                            <strong>{chat.user.nickname}</strong>
-                            {chat.messages.length !== 0 ? <Link to={`/chat?id=${chat.id}`}>{chat.messages[0].body}. {chat.messages[0].publicDate}. {chat.messages[0].isReaded ? "Прочитано" : "Новое"}</Link> : <p>Пусто</p>}
+                    <div className={cl.chatsContainer}>
+                        <h2 className={cl.pageTitle}>Ваши диалоги</h2>
+
+                        <div className={cl.searchWrapper}>
+                            <Input
+                                placeholder="Поиск собеседника..."
+                                prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                size="large"
+                                allowClear
+                                className={cl.searchInput}
+                            />
                         </div>
-                    )}
+
+                        {error && <h3 className={cl.error}>Ошибка: {error}</h3>}
+
+                        {isLoading ? (
+                            <div className={cl.loader}><LoadingOutlined style={{ fontSize: 40 }} /></div>
+                        ) : (
+                            <div className={cl.chatList}>
+                                    {filteredChats.length > 0 ? (
+                                        filteredChats.map(chat => (
+                                            <Link to={`/chat?id=${chat.id}`} key={chat.id} className={cl.chatItem}>
+                                                <div className={cl.avatarWrapper}>
+                                                    {chat.user?.avatar?.data ? (
+                                                        <img
+                                                            src={`data:${chat.user.avatar.contentType};base64,${chat.user.avatar.data}`}
+                                                            className={cl.chatAvatar}
+                                                            alt="avatar"
+                                                        />
+                                                    ) : (
+                                                        <Avatar size={54} icon={<UserOutlined />} />
+                                                    )}
+                                                </div>
+                                                <div className={cl.chatInfo}>
+                                                    <div className={cl.chatHeader}>
+                                                        <span className={cl.opponentName}>
+                                                            {chat.user?.nickname || "Пользователь"}
+                                                        </span>
+                                                        {chat.messages?.[0] && (
+                                                            <span className={cl.chatTime}>
+                                                                {new Date(chat.messages[0].publicDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className={cl.chatBody}>
+                                                        {chat.messages?.length > 0 ? (
+                                                            <p className={`${cl.lastMessage} ${!chat.messages[0].isReaded ? cl.unread : ''}`}>
+                                                                {chat.messages[0].body}
+                                                            </p>
+                                                        ) : (
+                                                            <p className={cl.emptyChat}>Нет сообщений</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        ))
+                                    ) : (
+                                        <p className={cl.emptyChat}>Ничего не найдено</p>
+                                    )}
+                            </div>
+                        )}
+                    </div>
                 </ContentRuW>
             </Layout>
-
         </Layout>
     );
 }

@@ -81,7 +81,7 @@ public class MessageService : IMessageInterface
         throw new NotImplementedException();
     }
 
-    public async Task<IEnumerable<Message>?> GetAllMessageByChat(DefaultUser user, int chatId)
+    public List<Message>? GetAllMessageByChat(string userId, int chatId)
     {
         Chat? existingChat = _chatService.GetChatById(chatId);
 
@@ -90,11 +90,12 @@ public class MessageService : IMessageInterface
             return [];
         }
 
-        return await _context.Messages
+        return _context.Messages
             .Include(m => m.MediaFiles)
             .Where(m => m.ChatId == existingChat.Id)
+            .OrderByDescending(m => m.PublicDate)
             .AsNoTracking()
-            .ToListAsync();
+            .ToList();
     }
 
     public async Task<IEnumerable<Message>?> GetAllMessageByChatSearch(int chatId, string bodySubStr)
@@ -130,6 +131,34 @@ public class MessageService : IMessageInterface
         throw new NotImplementedException();
     }
 
+    public async Task<bool> DeleteMessage(string userId, int messageId) 
+    {
+        // Получаем сообщение из базы вместе с зависимостями (медиафайлами)
+        var message = await _context.Messages
+            .Include(m => m.MediaFiles)
+            .FirstOrDefaultAsync(m => m.Id == messageId);
 
+        if (message == null)
+        {
+            return false;
+        }
+
+        // Проверка прав: только автор может удалить сообщение
+        if (message.UserId != userId)
+        {
+            return false;
+        }
+
+        // Удаляем связанные файлы вручную, если в базе не настроено каскадное удаление Cascade
+        if (message.MediaFiles != null)
+        {
+            _context.MediaFiles.RemoveRange(message.MediaFiles);
+        }
+
+        _context.Messages.Remove(message);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
     
 }

@@ -4,6 +4,7 @@ import cl from './HeaderRuW.module.css';
 import { BellFilled } from '@ant-design/icons';
 import { Avatar } from "antd";
 import { UserOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -18,7 +19,7 @@ const HeaderRuW = ({activeSidebar}) => {
             </div>
             <img src="./src/images/ruwitterlogo.svg" alt="" className={cl.logo} />
             <div className={cl.header_icons}>
-                <Avatar size={50} icon={<UserOutlined />} className={cl.avatar} />
+                <Link to={`/profile`} ><Avatar size={50} icon={<UserOutlined />} className={cl.avatar} /></Link>
             </div>
             
         </Header>

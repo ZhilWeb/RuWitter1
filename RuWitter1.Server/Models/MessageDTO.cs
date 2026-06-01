@@ -2,7 +2,7 @@
 {
     public class MessageDTO
     {
-        public int chatId {  get; set; }
+        public int СhatId {  get; set; }
         public string? Content { get; set; }
         public IFormFile? File { get; set; }
     }

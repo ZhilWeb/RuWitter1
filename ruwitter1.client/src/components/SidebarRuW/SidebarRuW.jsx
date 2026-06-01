@@ -35,7 +35,7 @@ const SidebarRuW = ({isActive }) => {
             <div className={cl.menu} /*style={{ height: '100%', display: 'flex', flexDirection: 'column', marginTop: '200px' }}*/>
                 <div className={cl.mobile_sidebar }>
                     <UserOutlined className={cl.icons} />
-                    <a href="#">Профиль</a>
+                    <a href="/profile">Профиль</a>
                 </div>
                 <div>
                     <PicRightOutlined className={cl.icons} />
@@ -43,7 +43,7 @@ const SidebarRuW = ({isActive }) => {
                 </div>
                 <div>
                     <FormOutlined className={cl.icons } />
-                    <a href="#">Добавить новую историю</a>
+                    <a href="/createpost">Добавить новую историю</a>
                 </div>
                 <div>
                     <SearchOutlined className={cl.icons} />

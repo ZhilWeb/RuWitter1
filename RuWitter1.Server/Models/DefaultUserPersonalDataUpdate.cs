@@ -7,6 +7,10 @@ namespace RuWitter1.Server.Models;
 public class DefaultUserPersonalDataUpdate
 {
     public int? AvatarId { get; set; }
+
+    [JsonIgnore]
+    public IFormFile? Avatar {  get; set; }
+
     public string? UserId { get; set; }
 
     public string PhoneNumber { get; set; } = String.Empty;

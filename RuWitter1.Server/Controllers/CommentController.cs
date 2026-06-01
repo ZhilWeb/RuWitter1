@@ -40,7 +40,7 @@ namespace RuWitter1.Server.Controllers
 
         // POST api/<CommentController>/1
         [HttpPost("{postId}")]
-        public async Task<IActionResult> Post(string body, int postId, List<IFormFile> formFiles)
+        public async Task<IActionResult> Post([FromForm] string body, [FromForm] int postId, [FromForm] List<IFormFile> formFiles)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
