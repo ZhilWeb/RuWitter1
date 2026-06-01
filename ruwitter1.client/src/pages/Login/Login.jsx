@@ -28,7 +28,7 @@ function Login() {
         e.preventDefault();
         // validate email and passwords
         if (!email || !password) {
-            setError("Please fill in all fields.");
+            setError("Пожалуйста, заполните все поля.");
         } else {
             // clear error message
             setError("");
@@ -55,62 +55,62 @@ function Login() {
                     // handle success or error from the server
                     console.log(data);
                     if (data.ok) {
-                        setError("Successful Login.");
+                        setError("Авторизация прошла успешно.");
                         window.location.href = '/';
                     }
                     else
-                        setError("Error Logging In.");
+                        setError("Ошибка авторизации.");
 
                 })
                 .catch((error) => {
                     // handle network error
                     console.error(error);
-                    setError("Error Logging in.");
+                    setError("Ошибка авторизации.");
                 });
         }
     };
 
     return (
-        <div className={cl.containerbox}>
-            <h3>Login</h3>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label className="forminput" htmlFor="email">Email:</label>
-                </div>
-                <div>
+        <div className={cl.formTitle}>
+            <h2 style={{ color: '#1DA1F2' }} >RuWitter</h2>
+            <h3>Авторизация</h3>
+            <form onSubmit={handleSubmit} className={cl.loginForm}>
+                <div className={cl.formGroup}>
+                    <label className={cl.formLabel} htmlFor="email">Email:</label>
                     <input
                         type="email"
                         id="email"
                         name="email"
                         value={email}
                         onChange={handleChange}
+                        className={cl.formInput}
                     />
                 </div>
-                <div>
-                    <label htmlFor="password">Password:</label>
-                </div>
-                <div>
+                <div className={cl.formGroup}>
+                    <label className={cl.formLabel} htmlFor="password">Пароль:</label>
                     <input
                         type="password"
                         id="password"
                         name="password"
                         value={password}
                         onChange={handleChange}
+                        className={cl.formInput}
                     />
                 </div>
-                <div>
+                <div className={cl.checkboxGroup}>
                     <input
                         type="checkbox"
                         id="rememberme"
                         name="rememberme"
                         checked={rememberme}
-                        onChange={handleChange} /><span>Remember Me</span>
+                        onChange={handleChange}
+                        className={cl.nativeCheckbox}
+                    />
+                    <span className={cl.checkboxLabel}>Запомнить меня</span>
                 </div>
-                <div>
-                    <button type="submit">Login</button>
-                </div>
-                <div>
-                    <button onClick={handleRegisterClick}>Register</button>
+                <div className={cl.actionButtons}>
+                    <button type="submit" className={cl.submitBtn}>Войти</button>
+                    <button onClick={handleRegisterClick} className={cl.registerBtn}>Зарегистрироваться</button>
                 </div>
             </form>
             {error && <p className="error">{error}</p>}

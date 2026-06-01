@@ -1,7 +1,7 @@
 .post_comment_container {
     position: fixed;
     height: calc(100% - 100px);
-    width: calc(100% - 330px);
+    width: 100%;
     overflow-y: scroll;
 }
 
@@ -25,4 +25,10 @@ hr {
 
 .comment:last-child > hr{
     display: none;
+}
+
+@media (min-width: 1150px) {
+    .post_comment_container {
+        width: calc(100% - 330px);
+    }
 }

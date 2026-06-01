@@ -7,6 +7,8 @@ public interface IPostInterface
     IEnumerable<Post>? GetAllPosts(int lastPostId);
     Post? GetPostById(int postId);
 
+    IEnumerable<Post>? GetPostsByCommunityId(int id);
+
     IEnumerable<Post>? GetPostsByUserId(string userId);
     Task CreatePost(string existingUserId, string body, List<IFormFile> files);
     Task UpdatePost(Post post, string body, List<IFormFile> files);

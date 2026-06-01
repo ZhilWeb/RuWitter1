@@ -228,6 +228,16 @@ public class PostService : IPostInterface
             .ToList();
     }
 
+    public IEnumerable<Post>? GetPostsByCommunityId(int id)
+    {
+        return _context.Posts
+            .Include(p => p.MediaFiles)
+            .OrderByDescending(p => p.PublicDate)
+            .Where(p => p.CommunityId != null && p.CommunityId == id)
+            .AsNoTracking()
+            .ToList();
+    }
+
     public async Task<IEnumerable<Post>?> GetPostsByNewsFeed(string userId, int minLikes = 5) 
     {
         // получаем лайки и просмотры

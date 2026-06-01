@@ -1,11 +1,11 @@
 .content {
     position: fixed;
     height: calc(100% - 100px);
-    width: 100%;
+    width: 100vh;
 }
 
 
-@media (min-width: 992px){
+@media (min-width: 1150px){
     .content {
         margin-left: 330px;
         width: calc(100% - 330px);

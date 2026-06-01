@@ -43,7 +43,7 @@
     background-color: #FFF;
 }
 
-@media (min-width: 992px){
+@media (min-width: 1150px){
     .burger{
         display: none;
     }

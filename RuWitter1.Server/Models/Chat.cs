@@ -10,7 +10,7 @@ public class Chat
 
     [Required]
     [MinLength(2)]
-    public ICollection<DefaultUser> Users { get; set; }
+    public ICollection<DefaultUser> Users { get; set; } = new List<DefaultUser>();
 
     public ICollection<Message>? Messages { get; set; }
 }

@@ -47,11 +47,7 @@ const SidebarRuW = ({isActive }) => {
                 </div>
                 <div>
                     <SearchOutlined className={cl.icons} />
-                    <a href="#">Поиск</a>
-                </div>
-                <div>
-                    <TeamOutlined className={cl.icons} />
-                    <a href="#">Друзья</a>
+                    <a href="/search">Поиск</a>
                 </div>
                 <div>
                     <MessageOutlined className={cl.icons} />

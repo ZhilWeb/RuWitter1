@@ -182,6 +182,7 @@
 
 /* Кнопка «Отправить» */
 .sendButton {
+    display: none;
     background: #1890ff;
     color: #ffffff;
     border: none;

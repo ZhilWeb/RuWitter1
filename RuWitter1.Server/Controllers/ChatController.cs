@@ -63,9 +63,29 @@ namespace RuWitter1.Server.Controllers
             return _chatService.GetChatById(chatId);
         }
 
+        [HttpGet("user/{someUserId}")]
+        public async Task<int> GetChatByUserId(string someUserId) // Убрали int?, так как возвращаем строго int (ID или 0)
+        {
+            // 1. Получаем ID текущего (авторизованного) пользователя
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return 0;
+            }
+
+            // 2. Вызываем обновленный метод сервиса, передавая оба ID
+            Chat? chat = await _chatService.GetPrivateChatByUsersAsync(currentUserId, someUserId);
+            if (chat == null)
+            {
+                return 0;
+            }
+
+            return chat.Id;
+        }
+
         // POST api/<ChatController>
         [HttpPost]
-        public async Task<IActionResult> Post(string acceptorUserId)
+        public async Task<IActionResult> Post([FromForm] string acceptorUserId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 

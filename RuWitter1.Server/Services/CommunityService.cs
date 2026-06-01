@@ -16,22 +16,30 @@ namespace RuWitter1.Server.Services
             _mediaFileService = mediaFileService;
         }
 
-        public async Task<string> CreateCommunity(string existingUserId, string name, IFormFile avatar, string briefInformation, int categoryId)
+        public async Task<string> CreateCommunity(string existingUserId, string name, List<IFormFile> avatars, string briefInformation, int categoryId)
         {
             // на пользователя проверяем в контроллере
 
             // добавление аватара
-            MediaFile? avatarFile = await _mediaFileService.InitMediaFile(avatar);
+            
 
 
             Community community = new Community
             {
                 DefaultUserId = existingUserId,
                 Name = name,
-                AvatarId = avatarFile?.Id,
+                
                 BriefInformation = briefInformation,
                 CommunityCategoryId = categoryId
             };
+
+            if (avatars.Any()) 
+            {
+                IFormFile avatar = avatars[0];
+                MediaFile? avatarFile = await _mediaFileService.InitMediaFile(avatar);
+                community.AvatarId = avatarFile?.Id;
+            }
+
 
             await _context.Communities.AddAsync(community);
             await _context.SaveChangesAsync();
@@ -43,6 +51,8 @@ namespace RuWitter1.Server.Services
         {
             throw new NotImplementedException();
         }
+
+        
 
         public IEnumerable<Community>? GetAllCommunitiesByUser(string existingUserId)
         {
@@ -61,6 +71,14 @@ namespace RuWitter1.Server.Services
         public Task UpdateCommunity(Community community)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<CommunityCategory>> GetCommunitiesCategories()
+        {
+            return await _context.CommunityCategories
+                .OrderBy(c => c.Id)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Community>> GetCommunityBySearch(string name, 
@@ -90,13 +108,22 @@ namespace RuWitter1.Server.Services
                     .ToListAsync();
             }
 
+            Console.WriteLine(name);
+            Console.WriteLine(communityCategoryIds);
+            Console.WriteLine(briefInformationSubstring);
+            Console.WriteLine(managerName);
+
             List<Community> communitites = await _context.Communities
-                .Include(c => c.Avatar)
                 .Where(c => c.Name.Contains(name))
                 .Where(c => c.BriefInformation.Contains(briefInformationSubstring))
                 .Where(c => c.DefaultUser != null && c.DefaultUser.Nickname.Contains(managerName))
                 .Where(c => c.CommunityCategoryId != null && communityCategoryIds.Contains((int)c.CommunityCategoryId))
                 .ToListAsync();
+
+            foreach (var community in communitites) 
+            {
+                Console.WriteLine(community.Name);
+            }
 
             return communitites;
         }

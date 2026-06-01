@@ -23,20 +23,28 @@ import AuthorizeView from "../../components/AuthorizeView";
 import PostItem from "../../components/PostItem";
 import UserProfileDescription from "../../components/UserProfileDescription";
 import DefaultUserPostList from "../../components/DefaultUserPostList";
+import { useParams } from 'react-router';
 
+function DefaultUserProfileById() {
+    let params = new URLSearchParams(window.location.search);
+    let userIdURL = params.get('id');
+    let isCommunityURL = params.get('iscomm');
+    console.log(userIdURL);
 
-function DefaultUserProfile() {
     const [user, setUser] = useState([]);
     const [posts, setPosts] = useState([]);
+    const [chatId, setChatId] = useState(0);
     const [isLikeLoading, setIsLikeLoading] = useState(false);
 
-    const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
+    const [fetchPosts, isPostsLoading, postError] = useFetching(async (userIdURL) => {
         console.log(posts);
 
         // console.log(postsPart[0]);
-        const personData = await PostService.getCurrUserPersonalData();
-        let postsPart = await PostService.getCurrentUserPosts();
+        const personData = await PostService.getUserPersonalDataById(userIdURL);
+        let postsPart = await PostService.getPostsByUserId(userIdURL);
         let avatar = await PostService.getAvatarById(personData.avatarId);
+        let chatId = await PostService.getChatByUserId(userIdURL);
+        if (chatId !== 0) setChatId(chatId);
         personData.avatar = avatar;
         let likesDataPart = [];
         for (let post of postsPart) {
@@ -60,8 +68,8 @@ function DefaultUserProfile() {
 
     useEffect(() => {
         console.log("ef");
-        fetchPosts();
-    }, []);
+        fetchPosts(userIdURL);
+    }, [userIdURL]);
 
 
     const handleLike = async (post) => {
@@ -94,14 +102,18 @@ function DefaultUserProfile() {
     };
 
     const deletePost = async (postId) => {
-        if (window.confirm("Вы уверены, что хотите удалить эту запись?"))
-        {
+        if (window.confirm("Вы уверены, что хотите удалить эту запись?")) {
             await PostService.deletePostById(postId);
             window.location.reload();
         }
         
     };
-    
+
+    const createChatByUserId = async () => {
+        await PostService.createChat(userIdURL);
+        window.location.href = "/chats";
+    }
+
     const { Header, Content, Footer, Sider } = Layout;
 
     const [isActiveSidebar, setActiveSidebar] = useState(false);
@@ -124,7 +136,7 @@ function DefaultUserProfile() {
         );
     }
 
-    
+    console.log(chatId);
     return (
         <Layout className={cl.App}>
             <HeaderRuW activeSidebar={ToggleSidebar} />
@@ -133,8 +145,8 @@ function DefaultUserProfile() {
                 <ContentRuW>
                     <div className={clid.post_comment_container}>
                         {postError && <h1>Произошла ошибка ${postError}</h1>}
-                        <UserProfileDescription user={user} />
-                        <DefaultUserPostList posts={posts} isLikeLoading={isLikeLoading} handleLike={handleLike} deletePost={deletePost} />
+                        <UserProfileDescription user={user} anotherUserId={userIdURL} createChatByUserId={createChatByUserId} chatId={chatId} />
+                        <DefaultUserPostList posts={posts} isLikeLoading={isLikeLoading} handleLike={handleLike} deletePost={deletePost} anotherUserId={userIdURL} />
                     </div>
                 </ContentRuW>
             </Layout>
@@ -143,4 +155,4 @@ function DefaultUserProfile() {
     );
 }
 
-export default DefaultUserProfile;
+export default DefaultUserProfileById;

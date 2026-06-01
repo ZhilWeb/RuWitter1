@@ -18,11 +18,12 @@ const PostItem = (props) => {
     return (
         <div className={cl.post}>
             <div className={cl.post_content}>
-                <div className={cl.avatar_name}>
-                    {props.post.user.avatar && <img src={`data:${props.post.user.avatar.contentType};base64,${props.post.user.avatar.data}`} height="400px" className={cl.avatar} />}
-                    <div className={cl.username}>{props.post.communityId ? props.post.user.name : props.post.user.nickname}</div>
-                </div>
-
+                <Link to={`/community?id=${props.post.user.id}`}>
+                    <div className={cl.avatar_name}>
+                        {props.post.user.avatar && <img src={`data:${props.post.user.avatar.contentType};base64,${props.post.user.avatar.data}`} height="400px" width="400px" className={cl.avatar} />}
+                        <div className={cl.username}>{props.post.communityId ? props.post.user.name : props.post.user.nickname}</div>
+                    </div>
+                </Link>
                 <br></br>
                 <p className={cl.post_body}>{props.post.body}</p>
                 {props.post.mediaFiles && props.post.mediaFiles.map((mediaFile) =>

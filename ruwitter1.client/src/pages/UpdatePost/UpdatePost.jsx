@@ -37,6 +37,7 @@ function UpdatePost() {
 
     const updatePost = async (newPost) => {
         await PostService.updatePost(post.id, newPost.body, newPost.files);
+        alert("Запись обновлена.");
         window.location.href = "/profile";
     };
 

@@ -15,5 +15,11 @@
     <Folder Include="src\pages\CreatePost\" />
     <Folder Include="src\pages\UpdateDefaultUserProfile\" />
     <Folder Include="src\pages\UpdatePost\" />
+    <Folder Include="src\pages\SearchPage\" />
+    <Folder Include="src\pages\DefaultUserProfileById\" />
+    <Folder Include="src\pages\CommunityProfileById\" />
+    <Folder Include="src\pages\CreateCommunityPost\" />
+    <Folder Include="src\pages\CreateCommunityBrief\" />
+    <Folder Include="src\pages\MyCommunities\" />
   </ItemGroup>
 </Project>

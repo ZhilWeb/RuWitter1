@@ -50,6 +50,14 @@ export default class PostService {
         return community;
     }
 
+    static async getCurrentUserCommunities() {
+        const community = fetch(`/api/Communities/currentusercomm`, {
+            method: "GET"
+        }).then((response) => response.json());
+        // console.log(personData);
+        return community;
+    }
+
     static async getCountOfPosts() {
 
         const postsCount = fetch('/api/Post/count', {
@@ -222,6 +230,32 @@ export default class PostService {
         return posts;
     }
 
+    static async getPostsByUserId(someUserId) {
+
+        const posts = fetch(`/api/Post/userposts/${someUserId}`, {
+            method: "GET"
+        }).then((response) => response.json());
+        // console.log(posts);
+        return posts;
+    }
+
+    static async getPostsByCommunityId(id) {
+
+        const posts = fetch(`/api/Post/community/${id}`, {
+            method: "GET"
+        }).then((response) => response.json());
+        // console.log(posts);
+        return posts;
+    }
+
+    static async IsCurrentUserCommunityManager(id) {
+        const isOwner = fetch(`/api/Communities/isusercomm/${id}`, {
+            method: "GET"
+        }).then((response) => response.json());
+
+        return isOwner;
+    }
+
     static async getCommentsByPostId(postId) {
 
         const comments = fetch(`/api/Comment/post/${postId}`, {
@@ -247,12 +281,29 @@ export default class PostService {
         return user;
     }
 
+    static async getUserPersonalDataById(id) {
+        const user = fetch(`/api/DefaultUser/${id}`, {
+            method: "GET"
+        }).then((response) => response.json());
+        // console.log(posts);
+        return user;
+    }
+
     static async getChats() {
         const chats = fetch('/api/Chat', {
             method: "GET"
         }).then((response) => response.json());
         // console.log(posts);
         return chats;
+    }
+
+
+    static async getCommunititesCategories() {
+        const categories = fetch('api/Communities/categories', {
+            method: "GET"
+        }).then((response) => response.json());
+        // console.log(posts);
+        return categories;
     }
 
     
@@ -336,6 +387,27 @@ export default class PostService {
         }
     }
 
+    static async createCommunityPost(body, communityId, files) {
+        const formData = new FormData();
+        formData.append('body', body);
+        for (let i = 0; i < files.length; i++) {
+            formData.append('formFiles', files[i]);
+        }
+        console.log(formData);
+        try {
+            const response = await fetch(`api/Post/community/${communityId}`, {
+                method: 'POST',
+
+                body: formData
+
+            });
+            return response;
+        } catch (error) {
+            console.error('Error sending message with file:', error);
+            throw error;
+        }
+    }
+
     static async updatePost(postId, body, files) {
         const formData = new FormData();
         formData.append('postId', postId);
@@ -401,6 +473,57 @@ export default class PostService {
         }
     }
 
+    static async createCommunityProfile(newProfile, avatar) {
+        const formData = new FormData();
+        formData.append('name', newProfile.name);
+        formData.append('categoryId', newProfile.communityCategoryId);
+        formData.append('briefInformation', newProfile.briefInformation);
+        formData.append('avatars', avatar);
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+
+        console.log(formData);
+        try {
+            const response = await fetch(`/api/Communities`, {
+                method: 'POST',
+
+                body: formData
+
+            });
+            return response;
+        } catch (error) {
+            console.error('Error sending message with file:', error);
+            throw error;
+        }
+    }
+
+
+    static async updateCommunityProfile(newProfile, avatar, communityId) {
+        const formData = new FormData();
+        formData.append('name', newProfile.name);
+        formData.append('categoryId', newProfile.communityCategoryId);
+        formData.append('briefInformation', newProfile.briefInformation);
+        formData.append('avatars', avatar);
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+
+        console.log(formData);
+        try {
+            const response = await fetch(`/api/Communities/updatebrief/${communityId}`, {
+                method: 'POST',
+
+                body: formData
+
+            });
+            return response;
+        } catch (error) {
+            console.error('Error sending message with file:', error);
+            throw error;
+        }
+    }
+
     // Внутри класса PostService в файле PostService.js
     static async getChatById(id) {
         const chat = fetch(`/api/Chat/${id}`, {
@@ -408,6 +531,15 @@ export default class PostService {
         }).then((response) => response.json());
         // console.log(chat);
         return chat;
+    }
+
+    static async getChatByUserId(someUserId) {
+        const chatId = fetch(`/api/Chat/user/${someUserId}`, {
+            method: "GET"
+        }).then((response) => response.json());
+        // console.log(chat);
+        return chatId;
+        
     }
 
     static async getMessagesByChatId(chatId) {
@@ -472,4 +604,76 @@ export default class PostService {
         }
         return enrichedChats;
     }
+
+    static async searchUsers(filters) {
+        const formData = new FormData();
+        // Названия ключей должны точно совпадать с параметрами в сигнатуре твоего [HttpPost] контроллера
+        formData.append('phoneNumber', filters.phoneNumber || "");
+        formData.append('nickname', filters.nickname || "");
+        formData.append('ageFrom', filters.ageFrom || 1);
+        formData.append('ageTo', filters.ageTo || 100);
+        formData.append('city', filters.city || "");
+        formData.append('interests', filters.interests || "");
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        try {
+            // Теперь эндпоинт официально принимает POST-запросы
+            const response = await fetch('api/DefaultUser/users-search', {
+                method: 'POST',
+                body: formData
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error searching users:', error);
+            throw error;
+        }
+    }
+
+    static async searchCommunities(filters) {
+        const formData = new FormData();
+        formData.append('name', filters.name || "");
+        formData.append('briefInformationSubstring', filters.briefInformationSubstring || "");
+        formData.append('managerName', filters.managerName || "");
+
+        // Передаем массив ID категорий для List<int> на бэкенде
+        if (filters.communityCategoryIds && filters.communityCategoryIds.length > 0) {
+            filters.communityCategoryIds.forEach(id => {
+                formData.append('communityCategoryIds', id);
+            });
+        }
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        try {
+            const response = await fetch('api/Communities/search', {
+                method: 'POST',
+                body: formData
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error searching communities:', error);
+            throw error;
+        }
+    }
+
+    static async createChat(acceptorUserId) {
+        const formData = new FormData();
+        formData.append('acceptorUserId', acceptorUserId);
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        try {
+            const response = await fetch('api/Chat', {
+                method: 'POST',
+                body: formData
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error searching communities:', error);
+            throw error;
+        }
+    }
+
+
 }

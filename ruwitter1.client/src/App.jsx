@@ -11,24 +11,42 @@ import HomePostIdPage from './pages/HomePostIdPage';
 import Chats from './pages/Chats/Chats';
 import ChatIdPage from './pages/ChatIdPage/ChatIdPage';
 import CreatePost from './pages/CreatePost/CreatePost';
+import CreateCommunityPost from './pages/CreateCommunityPost/CreateCommunityPost';
 import DefaultUserProfile from './pages/DefaultUserProfile/DefaultUserProfile';
 import UpdateDefaultUserProfile from './pages/UpdateDefaultUserProfile/UpdateDefaultUserProfile';
 import UpdatePost from './pages/UpdatePost/UpdatePost';
+import SearchPage from "./pages/SearchPage/SearchPage";
+import DefaultUserProfileById from './pages/DefaultUserProfileById/DefaultUserProfileById';
+import CommunityProfileById from './pages/CommunityProfileById/CommunityProfileById';
+import UpdateCommunityBrief from './pages/UpdateCommunityBrief/UpdateCommunityBrief';
+import CreateCommunityBrief from './pages/CreateCommunityBrief/CreateCommunityBrief';
+import MyCommunities from './pages/MyCommunities/MyCommunities';
+import UserAgreement from "./pages/UserAgreement";
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
+                <Route path="/search" element={<AuthorizeView><SearchPage /></AuthorizeView>} />
                 <Route path="/chat" element={<AuthorizeView><ChatIdPage /></AuthorizeView>} />
                 <Route path="/chats" element={<AuthorizeView><Chats /></AuthorizeView>} />
+                <Route path="/changecommunityprofile" element={<AuthorizeView><UpdateCommunityBrief /></AuthorizeView>} />
+                <Route path="/createcommunity" element={<AuthorizeView><CreateCommunityBrief /></AuthorizeView>} />
                 <Route path="/changeprofile" element={<AuthorizeView><UpdateDefaultUserProfile /></AuthorizeView>} />
+                <Route path="/community" element={<AuthorizeView><CommunityProfileById /></AuthorizeView>} />
+                <Route path="/mycommunities" element={<AuthorizeView><MyCommunities /></AuthorizeView>} />
+                <Route path="/user" element={<AuthorizeView><DefaultUserProfileById /></AuthorizeView>} />
                 <Route path="/profile" element={<AuthorizeView><DefaultUserProfile /></AuthorizeView>} />
                 <Route path="/changepost" element={<AuthorizeView><UpdatePost /></AuthorizeView>} />
+                <Route path="/createcommunitypost" element={<AuthorizeView><CreateCommunityPost /></AuthorizeView>} />
                 <Route path="/createpost" element={<AuthorizeView><CreatePost /></AuthorizeView>} />
                 <Route path="/post" element={<AuthorizeView><PostIdPage /></AuthorizeView>} />
                 <Route exact={true} path="/login" element={<Login />} />
                 <Route exact={true} path="/register" element={<Register />} />
+                <Route exact={true} path="/useragreement" element={<UserAgreement />} />
+                <Route exact={true} path="/privacy" element={<PrivacyPolicy />} />
                 <Route exact={true} path="/" element={<AuthorizeView><Posts /></AuthorizeView>} />
                 
                 <Route path="*" element={<Navigate to="/" replace />} />

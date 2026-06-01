@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import cl from "./Login/Login.module.css";
 
 function Register() {
     // state variables for email and passwords
@@ -30,11 +30,11 @@ function Register() {
         e.preventDefault();
         // validate email and passwords
         if (!email || !password || !confirmPassword) {
-            setError("Please fill in all fields.");
+            setError("Пожалуйста, заполните все поля.");
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            setError("Please enter a valid email address.");
+            setError("Пожалуйста, введите корректный адрес электронной почты.");
         } else if (password !== confirmPassword) {
-            setError("Passwords do not match.");
+            setError("Пароли не совпадают.");
         } else {
             // clear error message
             setError("");
@@ -54,62 +54,63 @@ function Register() {
                     // handle success or error from the server
                     console.log(data);
                     if (data.ok)
-                        setError("Successful register.");
+                        setError("Регистрация прошла успешно.");
                     else
-                        setError("Error registering.");
+                        setError("Ошибка регистрации.");
 
                 })
                 .catch((error) => {
                     // handle network error
                     console.error(error);
-                    setError("Error registering.");
+                    setError("Ошибка регистрации.");
                 });
         }
     };
 
     return (
-        <div className="containerbox">
-            <h3>Register</h3>
+        <div className={cl.formTitle}>
+            <h2 style={{ color: '#1DA1F2' }} >RuWitter</h2>
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="email">Email:</label>
-                </div><div>
+            <form onSubmit={handleSubmit} className={cl.loginForm}>
+                <div className={cl.formGroup}>
+                    <label className={cl.formLabel} htmlFor="email">Email:</label>
                     <input
                         type="email"
                         id="email"
                         name="email"
                         value={email}
                         onChange={handleChange}
+                        className={cl.formInput}
                     />
                 </div>
-                <div>
-                    <label htmlFor="password">Password:</label></div><div>
+                <div className={cl.formGroup}>
+                    <label className={cl.formLabel} htmlFor="password">Пароль:</label>
                     <input
                         type="password"
                         id="password"
                         name="password"
                         value={password}
                         onChange={handleChange}
+                        className={cl.formInput}
                     />
                 </div>
-                <div>
-                    <label htmlFor="confirmPassword">Confirm Password:</label></div><div>
+                <div className={cl.formGroup}>
+                    <label className={cl.formLabel} htmlFor="confirmPassword">Подтвердите пароль:</label>
                     <input
                         type="password"
                         id="confirmPassword"
                         name="confirmPassword"
                         value={confirmPassword}
                         onChange={handleChange}
+                        className={cl.formInput}
                     />
                 </div>
-                <div>
-                    <button type="submit">Register</button>
-
+                <p style={{ fontSize: '16px' }}>Пароль должен содержать 6 символов, заглавные и строчные английские буквы, цифры и специальные символы</p>
+                <div className={cl.actionButtons}>
+                    <button type="submit" className={cl.submitBtn}>Зарегистрироваться</button>
+                    <button onClick={handleLoginClick} className={cl.registerBtn}>Вернуться к авторизации</button>
                 </div>
-                <div>
-                    <button onClick={handleLoginClick}>Go to Login</button>
-                </div>
+                <p style={{ fontSize: '16px' }}>Нажимая кнопку "Зарегистрироваться", вы соглашаетесь с <a href="/useragreement" target="_blank">политикой конфиденциальности</a> и <a href="/privacy" target="_blank">пользовательским соглашением</a></p>
             </form>
 
             {error && <p className="error">{error}</p>}

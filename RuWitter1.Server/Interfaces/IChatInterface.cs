@@ -10,4 +10,6 @@ public interface IChatInterface
     Task UpdateChat(Chat chat);
     Task DeleteChat(string userId, int chatId);
     List<string?> GetUsersIdByChat(int chatId);
+
+    Task<Chat?> GetPrivateChatByUsersAsync(string currentUserId, string targetUserId);
 }

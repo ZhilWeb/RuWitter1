@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Layout, Avatar, Input } from "antd";
-import { UserOutlined, LoadingOutlined, PaperClipOutlined, SearchOutlined, DeleteOutlined } from '@ant-design/icons';
+import { UserOutlined, LoadingOutlined, PaperClipOutlined, SearchOutlined, DeleteOutlined, CheckOutlined } from '@ant-design/icons';
 import HeaderRuW from "../../components/HeaderRuW/HeaderRuW";
 import ContentRuW from "../../components/ContentRuW/ContentRuW";
 import SidebarRuW from "../../components/SidebarRuW/SidebarRuW";
@@ -8,6 +8,7 @@ import PostService from "../../API/PostService";
 import { useFetching } from "../../hooks/useFetching";
 import cl from "./ChatIdPage.module.css";
 import clposts from "../Posts/Posts.module.css";
+import { Link } from 'react-router-dom';
 
 function ChatIdPage() {
     const params = new URLSearchParams(window.location.search);
@@ -21,6 +22,7 @@ function ChatIdPage() {
     const [isActiveSidebar, setActiveSidebar] = useState(false);
 
     const messagesEndRef = useRef(null);
+    const submitRef = useRef(null);
 
     const [fetchChat, isLoading, error] = useFetching(async (id) => {
         const currUser = await PostService.getCurrUserPersonalData();
@@ -106,6 +108,10 @@ function ChatIdPage() {
         }
     };
 
+    const handleButtonClick = () => {
+        submitRef.current.click();
+    };
+
     const ToggleSidebar = () => setActiveSidebar(!isActiveSidebar);
 
     return (
@@ -122,14 +128,16 @@ function ChatIdPage() {
                             <>
                                 {/* Шапка текущего диалога */}
                                 <div className={cl.chatHeader}>
-                                    <div className={cl.userInfo}>
-                                        {chat.user?.avatar?.data ? (
-                                            <img src={`data:${chat.user.avatar.contentType};base64,${chat.user.avatar.data}`} className={cl.headerAvatar} alt="" />
-                                        ) : (
-                                            <Avatar size={40} icon={<UserOutlined />} />
-                                        )}
-                                        <strong className={cl.headerName}>{chat.user?.nickname || "Пользователь"}</strong>
-                                    </div>
+                                    <Link to={`/user?id=${chat.user.userId}`}>
+                                        <div className={cl.userInfo}>
+                                            {chat.user?.avatar?.data ? (
+                                                <img src={`data:${chat.user.avatar.contentType};base64,${chat.user.avatar.data}`} className={cl.headerAvatar} alt="" />
+                                            ) : (
+                                                <Avatar size={40} icon={<UserOutlined />} />
+                                            )}
+                                            <strong className={cl.headerName}>{chat.user?.nickname || "Пользователь"}</strong>
+                                        </div>
+                                    </Link>
 
                                     {/* Маленький инпут поиска внутри чата */}
                                     <div className={cl.messageSearchBox}>
@@ -195,7 +203,8 @@ function ChatIdPage() {
                                             style={{ display: 'none' }}
                                         />
                                     </label>
-                                    <button type="submit" className={cl.sendButton}>Отправить</button>
+                                    <button type="submit" className={cl.sendButton} ref={submitRef}>Отправить</button>
+                                    <CheckOutlined onClick={handleButtonClick} style={{ fontSize: '20px', color: '#1890ff' }} />
                                 </form>
                                 {file && <div className={cl.fileBadge}>Прикреплен файл: {file.name}</div>}
                             </>

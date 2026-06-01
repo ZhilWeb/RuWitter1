@@ -20,6 +20,7 @@ function CreatePost() {
 
     const createPost = async (newPost) => {
         await PostService.createPost(newPost.body, newPost.files);
+        alert("Запись добавлена.");
         window.location.reload();
     };
 

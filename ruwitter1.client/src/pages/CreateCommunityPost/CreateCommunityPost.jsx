@@ -7,10 +7,13 @@ import cl from "../Posts/Posts.module.css";
 import clpost from "../CreatePost/CreatePost.module.css";
 import PostService from "../../API/PostService";
 import PostForm from "../../components/PostForm";
-import UpdateProfile from "../../components/UpdateProfile";
 
 
-function UpdateDefaultUserProfile() {
+function CreateCommunityPost() {
+    let params = new URLSearchParams(window.location.search);
+    let userIdURL = params.get('id');
+    console.log(userIdURL);
+
     const { Header, Content, Footer, Sider } = Layout;
 
 
@@ -20,10 +23,10 @@ function UpdateDefaultUserProfile() {
         setActiveSidebar(!isActiveSidebar);
     };
 
-    const updateProfile = async (newProfile, avatar) => {
-        await PostService.updateCurrentUserProfile(newProfile, avatar);
-        alert("Профиль изменен.");
-        window.location.href = '/profile';
+    const createPost = async (newPost) => {
+        await PostService.createCommunityPost(newPost.body, userIdURL, newPost.files);
+        alert("Запись добавлена.");
+        window.location.reload();
     };
 
     return (
@@ -32,7 +35,7 @@ function UpdateDefaultUserProfile() {
             <Layout className={clpost.post_main_container}>
                 <SidebarRuW isActive={isActiveSidebar} />
                 <ContentRuW>
-                    <UpdateProfile update={updateProfile} />
+                    <PostForm create={createPost} />
                 </ContentRuW>
             </Layout>
 
@@ -40,4 +43,4 @@ function UpdateDefaultUserProfile() {
     );
 }
 
-export default UpdateDefaultUserProfile;
+export default CreateCommunityPost;

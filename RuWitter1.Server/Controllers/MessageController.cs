@@ -59,13 +59,6 @@ namespace RuWitter1.Server.Controllers
                 message.Body = System.Text.Encoding.UTF8.GetString(decryptedBody);
             }
             */
-            if(messages[0].MediaFiles != null) 
-            {
-                foreach (var file in messages[0].MediaFiles)
-                {
-                    Console.WriteLine(file.ContentType);
-                }
-            }
             
             return messages;
         }

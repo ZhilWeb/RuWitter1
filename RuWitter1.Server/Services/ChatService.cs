@@ -18,34 +18,26 @@ public class ChatService : IChatInterface
 
     public async Task CreateChat(DefaultUser hostUser, DefaultUser acceptorUser)
     {
+        // 1. Создаем новый чат
         Chat newChat = new Chat();
+
+        // 2. Инициализируем коллекцию пользователей чата, если она вдруг null
+        if (newChat.Users == null)
+        {
+            newChat.Users = new List<DefaultUser>();
+        }
+
+        // 3. Привязываем пользователей к чату напрямую через сущность чата
+        newChat.Users.Add(hostUser);
+        newChat.Users.Add(acceptorUser);
+
+        // 4. Добавляем чат в контекст. 
+        // EF Core сам поймет, что hostUser и acceptorUser уже существуют в базе (так как у них заполнены Id),
+        // и просто создаст записи в промежуточной таблице связей (например, ChatDefaultUser).
         _context.Chats.Add(newChat);
+
+        // 5. Сохраняем изменения ОДНИМ запросом
         await _context.SaveChangesAsync();
-
-        hostUser.Chats.Add(newChat);
-        acceptorUser.Chats.Add(newChat);
-        await _defaultUserService.UpdateUserAsync(hostUser);
-        await _defaultUserService.UpdateUserAsync(acceptorUser);
-
-        /*
-        ChatDefaultUser chatHost = new ChatDefaultUser
-        {
-            Chat = newChat,
-            UsersId = hostUserId,
-        };
-
-        ChatDefaultUser chatAcceptor = new ChatDefaultUser
-        {
-            Chat = newChat,
-            UsersId = acceptorUserId,
-        };
-
-        await _context.ChatDefaultUsers.AddRangeAsync(chatHost, chatAcceptor);
-        await _context.Chats.AddAsync(newChat);
-
-        await _context.SaveChangesAsync();
-        Console.WriteLine("Ok");
-        */
     }
 
     public Task DeleteChat(string userId, int chatId)
@@ -72,6 +64,21 @@ public class ChatService : IChatInterface
             .Include(c => c.Users)
             .Include(c => c.Messages)
             .SingleOrDefault(ch => ch.Id == chatId);
+    }
+
+    public async Task<Chat?> GetPrivateChatByUsersAsync(string currentUserId, string targetUserId)
+    {
+        if (_context.Chats == null) return null;
+
+        // Ищем чат, в котором:
+        // 1. Есть текущий пользователь (u.Id == currentUserId)
+        // 2. И в этом же чате есть целевой пользователь (u.Id == targetUserId)
+        return await _context.Chats
+            .Include(c => c.Users)
+            .FirstOrDefaultAsync(c =>
+                c.Users.Any(u => u.Id == currentUserId) &&
+                c.Users.Any(u => u.Id == targetUserId)
+            );
     }
 
     public List<string?> GetUsersIdByChat(int chatId)

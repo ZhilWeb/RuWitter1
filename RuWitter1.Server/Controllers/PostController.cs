@@ -56,6 +56,32 @@ namespace RuWitter1.Server.Controllers
             return _postService.GetPostsByUserId(userId);
         }
 
+        [HttpGet("userposts/{someUserId}")]
+        public IEnumerable<Post>? GetPostsByUserId(string someUserId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return [];
+            }
+
+            return _postService.GetPostsByUserId(someUserId);
+        }
+
+        [HttpGet("community/{id}")]
+        public IEnumerable<Post>? GetPostsByCommunityId(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return [];
+            }
+
+            return _postService.GetPostsByCommunityId(id);
+        }
+
 
         // GET api/<PostController>/post/5
         [HttpGet("post/{id}")]
@@ -80,8 +106,8 @@ namespace RuWitter1.Server.Controllers
         }
 
         // POST api/<PostController>/community/2
-        [HttpPost("/community/{communityId}")]
-        public async Task<IActionResult> PostByCommunity([FromForm] string body, int communityId, List<IFormFile> formFiles)
+        [HttpPost("community/{communityId}")]
+        public async Task<IActionResult> PostByCommunity([FromForm] string body, int communityId, [FromForm] List<IFormFile> formFiles)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var community = _communityService.GetCommunityById(communityId);

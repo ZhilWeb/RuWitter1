@@ -30,7 +30,7 @@ namespace RuWitter1.Server.Controllers
         }
 
         // GET: api/<DefaultUserController>/users-search
-        [HttpGet("users-search")]
+        [HttpPost("users-search")]
         public async Task<IEnumerable<DefaultUserPersonalDataUpdate>> GetAllUsersBySearch([FromForm] string phoneNumber = "",
             [FromForm] string nickname = "", [FromForm] int ageFrom = 1, 
             [FromForm] int ageTo = 100, [FromForm] string city = "", [FromForm] string interests = "") 

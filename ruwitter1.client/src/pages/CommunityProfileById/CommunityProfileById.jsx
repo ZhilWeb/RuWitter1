@@ -23,20 +23,29 @@ import AuthorizeView from "../../components/AuthorizeView";
 import PostItem from "../../components/PostItem";
 import UserProfileDescription from "../../components/UserProfileDescription";
 import DefaultUserPostList from "../../components/DefaultUserPostList";
+import { useParams } from 'react-router';
+import CommunityProfileDescription from "../../components/CommunityProfileDescription";
 
 
-function DefaultUserProfile() {
+function CommunityProfileById() {
+    let params = new URLSearchParams(window.location.search);
+    let userIdURL = params.get('id');
+    console.log(userIdURL);
+
     const [user, setUser] = useState([]);
     const [posts, setPosts] = useState([]);
     const [isLikeLoading, setIsLikeLoading] = useState(false);
+    const [communitiesCategories, setCommunitiesCategories] = useState([]);
+    const [isOwner, setIsOwner] = useState(false);
 
-    const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
+    const [fetchPosts, isPostsLoading, postError] = useFetching(async (userIdURL) => {
         console.log(posts);
 
         // console.log(postsPart[0]);
-        const personData = await PostService.getCurrUserPersonalData();
-        let postsPart = await PostService.getCurrentUserPosts();
+        const personData = await PostService.getCommunityById(userIdURL);
+        let postsPart = await PostService.getPostsByCommunityId(userIdURL);
         let avatar = await PostService.getAvatarById(personData.avatarId);
+        let isOwnerOfCommunity = await PostService.IsCurrentUserCommunityManager(userIdURL);
         personData.avatar = avatar;
         let likesDataPart = [];
         for (let post of postsPart) {
@@ -52,16 +61,27 @@ function DefaultUserProfile() {
         console.log(personData);
         console.log(postsPart);
 
+        const categories = await PostService.getCommunititesCategories();
+        console.log(categories);
+
+        // Сохраняем в стейт категорий на будущее (для других нужд компонента)
+        
+
+        // 2. Ищем название категории, используя ЛОКАЛЬНУЮ переменную categories
+
+        personData.category = categories.find(cat => cat.id === personData.communityCategoryId)?.name || "Не указана";
+        setCommunitiesCategories(categories);
         setUser(personData);
         setPosts(prevPosts => [...prevPosts, ...postsPart]);
+        setIsOwner(isOwnerOfCommunity);
         // setLastPostId(personDataPart[personDataPart.length - 1].id)
     });
 
 
     useEffect(() => {
         console.log("ef");
-        fetchPosts();
-    }, []);
+        fetchPosts(userIdURL);
+    }, [userIdURL]);
 
 
     const handleLike = async (post) => {
@@ -71,10 +91,10 @@ function DefaultUserProfile() {
 
         const newHasLike = !post.hasLike;
         try {
-            if (post.hasLike && post.communityId == null) {
-                await PostService.deleteLike(post.id);
-            } else if (!post.hasLike && post.communityId == null) {
-                await PostService.setLike(post.id);
+            if (post.hasLike) {
+                await PostService.deleteLikeByCommunity(post.id);
+            } else {
+                await PostService.setLikeByCommunity(post.id);
             }
 
         }
@@ -99,9 +119,8 @@ function DefaultUserProfile() {
             await PostService.deletePostById(postId);
             window.location.reload();
         }
-        
     };
-    
+
     const { Header, Content, Footer, Sider } = Layout;
 
     const [isActiveSidebar, setActiveSidebar] = useState(false);
@@ -124,7 +143,8 @@ function DefaultUserProfile() {
         );
     }
 
-    
+    console.log(user);
+    console.log(isOwner);
     return (
         <Layout className={cl.App}>
             <HeaderRuW activeSidebar={ToggleSidebar} />
@@ -133,8 +153,8 @@ function DefaultUserProfile() {
                 <ContentRuW>
                     <div className={clid.post_comment_container}>
                         {postError && <h1>Произошла ошибка ${postError}</h1>}
-                        <UserProfileDescription user={user} />
-                        <DefaultUserPostList posts={posts} isLikeLoading={isLikeLoading} handleLike={handleLike} deletePost={deletePost} />
+                        <CommunityProfileDescription user={user} anotherUserId={!isOwner} />
+                        <DefaultUserPostList posts={posts} isLikeLoading={isLikeLoading} handleLike={handleLike} deletePost={deletePost} anotherUserId={!isOwner} />
                     </div>
                 </ContentRuW>
             </Layout>
@@ -143,4 +163,4 @@ function DefaultUserProfile() {
     );
 }
 
-export default DefaultUserProfile;
+export default CommunityProfileById;
