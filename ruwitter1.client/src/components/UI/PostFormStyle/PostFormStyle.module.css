@@ -1,5 +1,15 @@
+.post_form_container {
+    position: fixed;
+    height: calc(100% - 100px);
+    width: 100%;
+    overflow-y: scroll;
+}
+
+
+
 .post_form{
     margin-top: 100px;
+    margin-bottom: 30px;
     margin-right: auto;
     margin-left: auto;
     background-color: #FFF;
@@ -40,4 +50,11 @@
     font-weight: 400;
     width: 520px;
     height: 240px;
+}
+
+
+@media (min-width: 1150px) {
+    .post_form_container {
+        width: calc(100% - 330px);
+    }
 }

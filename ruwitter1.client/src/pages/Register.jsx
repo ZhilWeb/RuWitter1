@@ -110,7 +110,7 @@ function Register() {
                     <button type="submit" className={cl.submitBtn}>Зарегистрироваться</button>
                     <button onClick={handleLoginClick} className={cl.registerBtn}>Вернуться к авторизации</button>
                 </div>
-                <p style={{ fontSize: '16px' }}>Нажимая кнопку "Зарегистрироваться", вы соглашаетесь с <a href="/useragreement" target="_blank">политикой конфиденциальности</a> и <a href="/privacy" target="_blank">пользовательским соглашением</a></p>
+                <p style={{ fontSize: '16px' }}>Нажимая кнопку "Зарегистрироваться", вы соглашаетесь с <a href="/privacy" target="_blank">политикой конфиденциальности</a> и <a href="/useragreement" target="_blank">пользовательским соглашением</a></p>
             </form>
 
             {error && <p className="error">{error}</p>}

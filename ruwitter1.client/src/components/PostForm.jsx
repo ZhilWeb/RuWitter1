@@ -35,48 +35,51 @@ const PostForm = ({ create, filledBody }) => {
 
 
     return (
-        <form className={plform.post_form}>
-            {/*Управляемый компонент*/}
-            <div className={plform.post_inputs}>
-                <textarea
-                    value={post.body}
-                    name='body'
-                    onChange={e => setPost({ ...post, body: e.target.value })}
-                    type="text"
-                    placeholder="Напишите что-нибудь..."
-                    maxLength="10000"
-                    // rows="10"
-                    // cols="50"
-                    className={plform.post_form_body}
-                ></textarea>
-                <label htmlFor='files' className={plform.post_label} style={{ color: '#888888' }}>Не больше 5 файлов</label>
-                <MyInput
-                    style={{ display: 'none' }}
-                    name='files'
-                    type="file"
-                    onChange={e => {
-                        // Превращаем FileList в стандартный массив JS
-                        const chosenFiles = Array.from(e.target.files);
+        <div className={plform.post_form_container }>
+            <form className={plform.post_form}>
+                {/*Управляемый компонент*/}
+                <div className={plform.post_inputs}>
+                    <textarea
+                        value={post.body}
+                        name='body'
+                        onChange={e => setPost({ ...post, body: e.target.value })}
+                        type="text"
+                        placeholder="Напишите что-нибудь..."
+                        maxLength="10000"
+                        // rows="10"
+                        // cols="50"
+                        className={plform.post_form_body}
+                    ></textarea>
+                    <label htmlFor='files' className={plform.post_label} style={{ color: '#888888' }}>Не больше 5 файлов</label>
+                    <MyInput
+                        style={{ display: 'none' }}
+                        name='files'
+                        type="file"
+                        onChange={e => {
+                            // Превращаем FileList в стандартный массив JS
+                            const chosenFiles = Array.from(e.target.files);
 
-                        setPost({
-                            ...post,
-                            // Объединяем старые файлы с новыми
-                            files: [...post.files, ...chosenFiles]
-                        });
-                    }}
+                            setPost({
+                                ...post,
+                                // Объединяем старые файлы с новыми
+                                files: [...post.files, ...chosenFiles]
+                            });
+                        }}
 
-                    multiple
-                    accept="image/*"
-                    ref={fileInputRef}
-                />
-                <PaperClipOutlined onClick={handleImageClick} style={{ fontSize: '40px' }} />
-            </div>
-            <div style={{ display: 'flex', width: '520px', justifyContent: 'space-between' }}>
-                {filledBody && <Link to={'/profile'} ><MyButton style={{ backgroundColor: '#FFFFFF', color: '#1DA1F2' }}>Отменить</MyButton></Link>}
-                <MyButton onClick={addNewPost}>Опубликовать</MyButton>
-            </div>
-            
-        </form>
+                        multiple
+                        accept="image/*"
+                        ref={fileInputRef}
+                    />
+                    <PaperClipOutlined onClick={handleImageClick} style={{ fontSize: '40px' }} />
+                </div>
+                <div style={{ display: 'flex', width: '520px', justifyContent: 'space-between' }}>
+                    {filledBody && <Link to={'/profile'} ><MyButton style={{ backgroundColor: '#FFFFFF', color: '#1DA1F2' }}>Отменить</MyButton></Link>}
+                    <MyButton onClick={addNewPost}>Опубликовать</MyButton>
+                </div>
+
+            </form>
+        </div>
+        
     );
 
 };

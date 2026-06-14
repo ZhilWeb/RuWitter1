@@ -51,7 +51,8 @@ const UpdateCommunityProfile = ({ update, communitiesCategories, communityId, bu
 
 
     return (
-        <form className={plform.post_form}>
+        <div className={plform.post_form_container}>
+            <form className={plform.post_form}>
             {/*Управляемый компонент*/}
             <div className={plform.post_inputs}>
                 {
@@ -116,7 +117,8 @@ const UpdateCommunityProfile = ({ update, communitiesCategories, communityId, bu
                 <MyButton onClick={newUpdateProfile}>{buttonText}</MyButton>
             </div>
 
-        </form>
+            </form>
+        </div>
     );
 
 };

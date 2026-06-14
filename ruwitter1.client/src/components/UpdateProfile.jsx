@@ -55,7 +55,8 @@ const UpdateProfile = ({ update }) => {
 
 
     return (
-        <form className={plform.post_form}>
+        <div className={plform.post_form_container }>
+            <form className={plform.post_form}>
             {/*Управляемый компонент*/}
             <div className={plform.post_inputs}>
                 {
@@ -131,7 +132,8 @@ const UpdateProfile = ({ update }) => {
                 <MyButton onClick={newUpdateProfile}>Изменить</MyButton>
             </div>
             
-        </form>
+            </form>
+        </div>
     );
 
 };
