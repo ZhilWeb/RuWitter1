@@ -18,11 +18,11 @@ const UserProfileDescription = ({ user, anotherUserId, createChatByUserId, chatI
                     {user.nickname && <div className={cl.username}>{user.nickname}</div>}
                 </div>
                 <div className={cluser.description_body}>
-                    {user.phoneNumber && <div className={cluser.simple_discription}>Телефон: <p>{user.phoneNumber}</p></div>}
-                    {user.age && <div className={cluser.simple_discription}>Возраст: <p>{user.age}</p></div>}
-                    {user.city && <div className={cluser.simple_discription}>Город: <p>{user.city}</p></div>}
-                    {user.interests && <div className={cluser.simple_discription}>Интересы: <p>{user.interests}</p></div>}
-                    {user.briefInformation && <div>О себе:<p>{user.briefInformation}</p></div>}
+                    {user.phoneNumber ? <div className={cluser.simple_discription}>Телефон: <p>{user.phoneNumber}</p></div> : <div className={cluser.simple_discription}>Телефон:</div>}
+                    {user.age ? <div className={cluser.simple_discription}>Возраст: <p>{user.age}</p></div> : <div className={cluser.simple_discription}>Возраст:</div>}
+                    {user.city ? <div className={cluser.simple_discription}>Город: <p>{user.city}</p></div> : <div className={cluser.simple_discription}> Город:</div>}
+                    {user.interests ? <div className={cluser.simple_discription}>Интересы: <p>{user.interests}</p></div> : <div className={cluser.simple_discription}> Интересы:</div>}
+                    {user.briefInformation ? <div>О себе:<p>{user.briefInformation}</p></div> : <div className={cluser.simple_discription}>О себе:</div>}
                 </div>
                 
                 {anotherUserId ? (chatId !== 0 ?
