@@ -189,7 +189,7 @@ namespace RuWitter1.Server.Models
             // 5. Инициализация MediaFiles для ПОСТОВ (сохраняем их в базу первыми)
             string postImagesFolderPath = @"C:\Users\RTK1\Pictures\Диплом\Записи";
             var postMediaFilesPool = new List<MediaFile>();
-            string csvFilePath = @"F:\MyFiles\lenta-ru-news-recommend-data700.csv";
+            string csvFilePath = @"C:\Users\RTK1\MyFiles\lenta-ru-news-recommend-data.csv";
             int textCountByCategory = 100;
             List<string> usedPostFiles = new List<string>();
             Console.OutputEncoding = Encoding.UTF8;

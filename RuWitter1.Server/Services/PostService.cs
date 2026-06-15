@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using RuWitter1.Server.Interfaces;
 using RuWitter1.Server.Models;
 using System.Collections;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RuWitter1.Server.Services;
 
@@ -299,7 +300,51 @@ public class PostService : IPostInterface
             .ToList();
 
         // получаем рекомендации
-        List<int> recommendations = await _recommendationClient.GetPostReccomends(communityPostsLikesIds, communityPostWatchesIds, postsTexts);
+        List<int> recommendations = new List<int>();
+        try
+        {
+            recommendations = await _recommendationClient.GetPostReccomends(communityPostsLikesIds, communityPostWatchesIds, postsTexts);
+        } catch (HttpRequestException ex)
+        {
+            // берем 10 случайных записей
+            List<Post> randomCommunityPosts = new List<Post>();
+            int postsCount = _context.Posts
+                    .Where(p => p.UserId != userId && p.CommunityId != null)
+                    .Count();
+            while (randomCommunityPosts.Count < 10)
+            {
+                int randomIndex = new Random().Next(0, postsCount);
+                Post? randomPost = _context.Posts
+                    .Where(p => p.UserId != userId && p.CommunityId != null
+                        && !communityPostWatchesIds.Contains(p.Id) && !randomCommunityPosts.Contains(p) && !communityPostsLikesIds.Contains(p.Id))
+                    .Skip(randomIndex)
+                    .FirstOrDefault();
+
+                if (randomPost != null) randomCommunityPosts.Add(randomPost);
+
+            }
+            // записываем записи как просмотренные
+            List<CommunityPostWatches> communityRandomPostWatches = new List<CommunityPostWatches>();
+            foreach (var post in randomCommunityPosts)
+            {
+                if (post.CommunityId != null)
+                {
+                    CommunityPostWatches communityPostWatch = new CommunityPostWatches
+                    {
+                        DefaultUserId = userId,
+                        CommunityId = (int)post.CommunityId,
+                        PostId = post.Id,
+                    };
+                    communityRandomPostWatches.Add(communityPostWatch);
+                }
+
+            }
+            await _context.CommunityPostWatches.AddRangeAsync(communityRandomPostWatches);
+            await _context.SaveChangesAsync();
+
+            return randomCommunityPosts;
+        }
+
 
         Dictionary<int, int> sortRecommendations = recommendations
         .Select((id, index) => new
@@ -452,7 +497,7 @@ public class PostService : IPostInterface
 
 
     public async Task<IEnumerable<Post>?> GetPostsBySearch(string userId, string postSubString, 
-        string communityNameSubString, List<int> communityCategoryIds, DateTime dateTimeFrom, DateTime dateTimeTo, int minLikes = 5) 
+        string communityNameSubString, List<int>? communityCategoryIds, DateTime? dateTimeFrom, DateTime? dateTimeTo, int minLikes = 5) 
     {
         // устанавливаем значения по умолчанию
         if (postSubString == null) 
@@ -465,7 +510,7 @@ public class PostService : IPostInterface
             communityNameSubString = "";
         }
 
-        if (communityCategoryIds.Count == 0) 
+        if (communityCategoryIds == null || communityCategoryIds.Count == 0) 
         {
             communityCategoryIds = await _context.CommunityCategories
                 .OrderBy(c => c.Id)
@@ -473,14 +518,23 @@ public class PostService : IPostInterface
                 .ToListAsync();
         }
 
-        if (dateTimeFrom == default(DateTime)) 
+        if (dateTimeFrom == null) 
         {
             dateTimeFrom = new DateTime();
         }
 
-        if (dateTimeTo == default(DateTime)) 
+        if (dateTimeTo == null) 
         {
-            dateTimeTo = new DateTime();
+            dateTimeTo = DateTime.UtcNow;
+        }
+        if (dateTimeFrom.HasValue)
+        {
+            dateTimeFrom = DateTime.SpecifyKind(dateTimeFrom.Value, DateTimeKind.Utc);
+        }
+
+        if (dateTimeTo.HasValue)
+        {
+            dateTimeTo = DateTime.SpecifyKind(dateTimeTo.Value, DateTimeKind.Utc);
         }
         Console.WriteLine(postSubString);
         Console.WriteLine(communityNameSubString);
@@ -507,6 +561,7 @@ public class PostService : IPostInterface
             .Where(p => p.UserId != userId)
             .ToListAsync();
 
+        if(posts.Count > 0) Console.WriteLine(posts[0].Id);
         if (communityPostsLikesIds.Count < minLikes)
         {
             return posts;
@@ -527,11 +582,18 @@ public class PostService : IPostInterface
             .Select(p => p.Body)
             .ToList();
 
-        
+
 
         // получаем рекомендации
-        List<int> recommendations = await _recommendationClient
-            .GetPostReccomendsForSearch(communityPostsLikesIds, communityPostsLikesTexts, postIds, postTexts);
+        List<int> recommendations = new List<int>();
+        try
+        {
+            recommendations = await _recommendationClient.GetPostReccomendsForSearch(communityPostsLikesIds, communityPostsLikesTexts, postIds, postTexts);
+        }
+        catch (HttpRequestException ex) 
+        {
+            return posts;
+        }
 
         Dictionary<int, int> sortRecommendations = recommendations
         .Select((id, index) => new

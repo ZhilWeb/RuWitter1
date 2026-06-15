@@ -657,6 +657,39 @@ export default class PostService {
         }
     }
 
+    static async searchCommunityPosts(filters) {
+        const formData = new FormData();
+        formData.append('postSubString', filters.textSubstring || "");
+        formData.append('communityNameSubString', filters.communityName || "");
+        formData.append('dateTimeFrom', filters.dateFrom || "");
+        formData.append('dateTimeTo', filters.dateTo || "");
+
+        // Передаем массив ID категорий
+        if (filters.categoryIds && filters.categoryIds.length > 0) {
+            filters.categoryIds.forEach(id => {
+                formData.append('communityCategoryIds', id);
+            });
+        }
+
+        try {
+            const response = await fetch('/api/Post/search', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Ошибка поиска записей ${response.status}:`, errorText);
+                throw new Error(errorText);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error searching community posts:', error);
+            throw error;
+        }
+    }
+
     static async createChat(acceptorUserId) {
         const formData = new FormData();
         formData.append('acceptorUserId', acceptorUserId);

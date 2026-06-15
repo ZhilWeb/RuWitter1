@@ -30,7 +30,7 @@ public interface IPostInterface
     Task<bool> DeletePostWatches(string userId);
 
     Task<IEnumerable<Post>?> GetPostsBySearch(string userId, string postSubString,
-        string communityNameSubString, List<int> communityCategoryIds, DateTime dateTimeFrom, DateTime dateTimeTo, int minLikes = 5);
+        string communityNameSubString, List<int>? communityCategoryIds, DateTime? dateTimeFrom, DateTime? dateTimeTo, int minLikes = 5);
 
     Task<bool> IsSetPostLikeByUser(string userId, int postId, int? commentId = null);
 

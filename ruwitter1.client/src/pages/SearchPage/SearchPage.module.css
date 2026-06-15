@@ -131,3 +131,71 @@
     padding: 30px 0;
     font-style: italic;
 }
+
+
+/* Стили для новых элементов поиска постов */
+.subLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #595959;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+
+.postCard {
+    border-radius: 12px !important;
+    border: 1px solid #e8e8e8 !important;
+    padding: 4px;
+}
+
+.postHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    position: relative;
+}
+
+.postMetaInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.postCommunityName {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f1f1f;
+}
+
+.postDate {
+    font-size: 12px;
+    color: #8c8c8c;
+}
+
+.postCategoryTag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #e6f7ff;
+    color: #1890ff;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.postContent {
+    font-size: 14px;
+    color: #262626;
+    line-height: 1.5;
+    white-space: pre-wrap; /* Сохраняет переносы строк из базы данных */
+}
+
+.postImage {
+    margin-top: 12px;
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #f0f0f0;
+}
