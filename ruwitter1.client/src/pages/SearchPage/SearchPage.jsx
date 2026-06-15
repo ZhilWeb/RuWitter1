@@ -1,7 +1,7 @@
 // SearchPage.jsx
 import React, { useEffect, useState } from "react";
-import { Layout, Avatar, Card, Row, Col, Input, InputNumber, Button, Space, Select } from "antd";
-import { UserOutlined, TeamOutlined, SearchOutlined, EnvironmentOutlined, PhoneOutlined } from '@ant-design/icons';
+import { Layout, Avatar, Card, Row, Col, Input, InputNumber, Button, Space, Select, DatePicker } from "antd";
+import { UserOutlined, TeamOutlined, SearchOutlined, EnvironmentOutlined, PhoneOutlined, FileTextOutlined, CalendarOutlined } from '@ant-design/icons';
 import HeaderRuW from "../../components/HeaderRuW/HeaderRuW";
 import ContentRuW from "../../components/ContentRuW/ContentRuW";
 import SidebarRuW from "../../components/SidebarRuW/SidebarRuW";
@@ -10,15 +10,22 @@ import { useFetching } from "../../hooks/useFetching";
 import cl from "./SearchPage.module.css";
 import clposts from "../Posts/Posts.module.css";
 import { Link } from 'react-router-dom';
+import PostList from "../../components/PostList";
+import PostItem from "../../components/PostItem";
 
+
+const { Option } = Select;
+const { RangePicker } = DatePicker;
 function SearchPage() {
-    const [searchMode, setSearchMode] = useState("users"); // Переключение между "users" и "communities"
+    const [searchMode, setSearchMode] = useState("users"); // Переключение между "users", "communities" и "posts"
     const [isActiveSidebar, setActiveSidebar] = useState(false);
     const [communitiesCategories, setCommunitiesCategories] = useState([]);
 
     // Результаты поиска
     const [usersResults, setUsersResults] = useState([]);
     const [communitiesResults, setCommunitiesResults] = useState([]);
+    const [postsResults, setPostsResults] = useState([]);
+    const [isLikeLoading, setIsLikeLoading] = useState(false);
 
     // 1. Поля формы компонента поиска ПОЛЬЗОВАТЕЛЕЙ
     const [userFilters, setUserFilters] = useState({
@@ -36,6 +43,15 @@ function SearchPage() {
         briefInformationSubstring: "",
         managerName: "",
         communityCategoryIds: []
+    });
+
+    // 3. Поля формы компонента поиска ЗАПИСЕЙ
+    const [postFilters, setPostFilters] = useState({
+        textSubstring: "",
+        communityName: "",
+        dateFrom: "",
+        dateTo: "",
+        categoryIds: []
     });
 
     // Стейт для парсинга ID категорий (вводятся пользователем через запятую, например "1, 3, 4")
@@ -70,6 +86,38 @@ function SearchPage() {
         setCommunitiesResults(enrichedUsers);
     });
 
+
+    // Хук для загрузки записей
+    const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
+
+        let postsPart = await PostService.searchCommunityPosts(postFilters);
+
+        // console.log(postsPart[0]);
+        let personDataPart = [];
+        let avatarDataPart = [];
+        let likesDataPart = [];
+        for (let post of postsPart) {
+            const personData = await PostService.getCommunityById(post.communityId);
+            personDataPart.push(personData);
+            // console.log(personData);
+            const avatar = await PostService.getAvatarById(personData.avatarId);
+            // console.log(personData.avatar);
+            avatarDataPart.push(avatar);
+            const hasLike = await PostService.isSetLikeByCurrentUser(post.id);
+            likesDataPart.push(hasLike);
+        }
+
+        for (let i = 0; i < postsPart.length; i++) {
+            postsPart[i].user = personDataPart[i];
+            postsPart[i].user.avatar = avatarDataPart[i];
+            postsPart[i].hasLike = likesDataPart[i];
+        }
+
+        console.log(postsPart);
+        setPostsResults(postsPart);
+        // setLastPostId(personDataPart[personDataPart.length - 1].id)
+    });
+
     useEffect(() => {
         
         const loadCategories = async () => {
@@ -96,6 +144,53 @@ function SearchPage() {
         fetchCommunities();
     };
 
+    const handlePostsSubmit = (e) => {
+        e.preventDefault();
+        fetchPosts();
+    }
+
+    // Обработчик изменения дат в RangePicker
+    const handleDateChange = (dates, dateStrings) => {
+        if (dates) {
+            setPostFilters({
+                ...postFilters,
+                dateFrom: dateStrings[0], // Строка формата YYYY-MM-DD
+                dateTo: dateStrings[1]   // Строка формата YYYY-MM-DD
+            });
+        } else {
+            setPostFilters({ ...postFilters, dateFrom: "", dateTo: "" });
+        }
+    };
+
+    const handleLike = async (post) => {
+        if (isLikeLoading) return;
+
+        setIsLikeLoading(true);
+
+        const newHasLike = !post.hasLike;
+        try {
+            if (post.hasLike) {
+                await PostService.deleteLikeByCommunity(post.id);
+            } else {
+                await PostService.setLikeByCommunity(post.id);
+            }
+
+        }
+        finally {
+            setIsLikeLoading(false);
+            setPostsResults(posts =>
+                posts.map(rendPost =>
+                    rendPost.id === post.id
+                        ? {
+                            ...rendPost,
+                            hasLike: newHasLike,
+                        }
+                        : rendPost
+                )
+            );
+        }
+    };
+
     const ToggleSidebar = () => setActiveSidebar(!isActiveSidebar);
 
 
@@ -116,8 +211,9 @@ function SearchPage() {
                                 onChange={(e) => setSearchMode(e.target.value)}
                                 className={cl.nativeSelect}
                             >
-                                <option value="users">Поиск Пользователей</option>
-                                <option value="communities">Поиск Сообществ</option>
+                                <option value="users">Поиск пользователей</option>
+                                <option value="communities">Поиск сообществ</option>
+                                <option value="posts">Поиск записей</option>
                             </select>
                         </div>
 
@@ -303,6 +399,73 @@ function SearchPage() {
                             </div>
                         )}
 
+                        {/* ================= КОМПОНЕНТ ПОИСКА ЗАПИСЕЙ ================= */}
+                        {searchMode === "posts" && (
+                            <div className={cl.searchSection}>
+                                <form onSubmit={handlePostsSubmit} className={cl.searchForm}>
+                                    <h3 className={cl.sectionTitle}>Настройки фильтрации публикаций</h3>
+                                    <Row gutter={[16, 16]}>
+                                        <Col xs={24} sm={12} md={8}>
+                                            <Input
+                                                placeholder="Фрагмент текста записи"
+                                                prefix={<FileTextOutlined />}
+                                                value={postFilters.textSubstring}
+                                                onChange={e => setPostFilters({ ...postFilters, textSubstring: e.target.value })}
+                                            />
+                                        </Col>
+                                        <Col xs={24} sm={12} md={8}>
+                                            <Input
+                                                placeholder="Название сообщества"
+                                                prefix={<TeamOutlined />}
+                                                value={postFilters.communityName}
+                                                onChange={e => setPostFilters({ ...postFilters, communityName: e.target.value })}
+                                            />
+                                        </Col>
+                                        <Col xs={24} sm={12} md={8}>
+                                            <Select
+                                                mode="multiple"
+                                                showSearch
+                                                allowClear
+                                                style={{ width: '100%' }}
+                                                placeholder="Категории сообществ..."
+                                                value={postFilters.categoryIds}
+                                                onChange={ids => setPostFilters({ ...postFilters, categoryIds: ids })}
+                                                filterOption={(input, option) =>
+                                                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                                }
+                                            >
+                                                {communitiesCategories.map(cat => (
+                                                    <Option key={cat.id} value={cat.id}>{cat.name}</Option>
+                                                ))}
+                                            </Select>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={12}>
+                                            <Space direction="vertical" style={{ width: '100%' }}>
+                                                <span className={cl.subLabel}><CalendarOutlined /> Дата публикации (От — До):</span>
+                                                <RangePicker
+                                                    style={{ width: '100%' }}
+                                                    placeholder={['Начальная дата', 'Конечная дата']}
+                                                    onChange={handleDateChange}
+                                                />
+                                            </Space>
+                                        </Col>
+                                    </Row>
+                                    <Button type="primary" htmlType="submit" icon={<SearchOutlined />} loading={isPostsLoading} className={cl.submitBtn}>
+                                        Найти публикации
+                                    </Button>
+                                </form>
+
+                                {postError && <p className={cl.error}>Ошибка: {postError}</p>}
+
+                                {/* Вывод списка записей */}
+                                <div className={cl.resultsContainer}>
+                                    {postsResults.map((post, index) =>
+                                        <PostItem number={index + 1} post={post} key={post.id} isLikeLoading={isLikeLoading} handleLike={handleLike} />
+                                    )}
+                                </div>
+                                {!isPostsLoading && postsResults.length === 0 && <p className={cl.empty}>Список пуст. Измените параметры поиска сообществ.</p>}
+                            </div>
+                        )}
                     </div>
                 </ContentRuW>
             </Layout>

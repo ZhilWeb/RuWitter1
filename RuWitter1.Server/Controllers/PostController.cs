@@ -196,10 +196,16 @@ namespace RuWitter1.Server.Controllers
 
         // POST: api/<PostController>/search
         [HttpPost("search")]
-        public async Task<IEnumerable<Post>?> GetPostBySearch([FromForm] List<int> communityCategoryIds, 
-            [FromForm] DateTime dateTimeFrom, [FromForm] DateTime dateTimeTo, 
+        public async Task<IEnumerable<Post>?> GetPostBySearch([FromForm] List<int>? communityCategoryIds = null, 
+            [FromForm] DateTime? dateTimeFrom = null, [FromForm] DateTime? dateTimeTo = null, 
             [FromForm] string postSubString = "", [FromForm] string communityNameSubString = "") 
         {
+            Console.WriteLine(communityCategoryIds);
+            Console.WriteLine(dateTimeFrom);
+            Console.WriteLine(dateTimeTo);
+            Console.WriteLine(postSubString);
+            Console.WriteLine(communityNameSubString);
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
