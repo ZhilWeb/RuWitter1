@@ -127,6 +127,14 @@ public class MediaFileService : IMediaFileInterface
             Console.WriteLine("No file uploaded.");
             return null; // BadRequest("No file uploaded.")
         }
+
+        Console.WriteLine(formFile.Length);
+        if(formFile.Length > 2147483648)
+        {
+            Console.WriteLine("File size bigger than 2GB.");
+            return null;
+        }
+
         IEnumerable<MediaExtension> mediaExtensionsEnum = await _mediaExtensionService.GetAll();
         List<MediaExtension> mediaExtensions = mediaExtensionsEnum.ToList();
 

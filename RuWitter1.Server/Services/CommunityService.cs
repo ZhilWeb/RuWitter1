@@ -37,7 +37,7 @@ namespace RuWitter1.Server.Services
             {
                 IFormFile avatar = avatars[0];
                 MediaFile? avatarFile = await _mediaFileService.InitMediaFile(avatar);
-                community.AvatarId = avatarFile?.Id;
+                if(avatarFile != null) community.AvatarId = avatarFile?.Id;
             }
 
 

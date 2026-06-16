@@ -38,7 +38,7 @@ public class MessageService : IMessageInterface
             Message message = new Message
             {
                 UserId = hostUser.Id,
-                Body = body,
+                Body = DataProtector.Encrypt(body),
                 MediaFiles = null,
                 ChatId = existingChat.Id
             };
@@ -65,7 +65,7 @@ public class MessageService : IMessageInterface
         Message messageWithFiles = new Message
         {
             UserId = hostUser.Id,
-            Body = body,
+            Body = DataProtector.Encrypt(body),
             MediaFiles = postMediaFiles,
             ChatId = existingChat.Id
         };
@@ -90,12 +90,19 @@ public class MessageService : IMessageInterface
             return [];
         }
 
-        return _context.Messages
+        var messages = _context.Messages
             .Include(m => m.MediaFiles)
             .Where(m => m.ChatId == existingChat.Id)
             .OrderByDescending(m => m.PublicDate)
             .AsNoTracking()
             .ToList();
+
+        for (int i = 0; i < messages.Count; i++)
+        {
+            messages[i].Body = DataProtector.Decrypt(messages[i].Body);
+        }
+
+        return messages;
     }
 
     public async Task<IEnumerable<Message>?> GetAllMessageByChatSearch(int chatId, string bodySubStr)
@@ -112,11 +119,18 @@ public class MessageService : IMessageInterface
             return [];
         }
 
-        return await _context.Messages
+        var messages = await _context.Messages
             .Include(m => m.MediaFiles)
             .Where(m => m.ChatId == existingChat.Id && m.Body.Contains(bodySubStr))
             .AsNoTracking()
             .ToListAsync();
+
+        for (int i = 0; i < messages.Count; i++) 
+        {
+            messages[i].Body = DataProtector.Decrypt(messages[i].Body);
+        }
+
+        return messages;
     }
 
     public Message? GetMessageById(Chat chat, int messageId)

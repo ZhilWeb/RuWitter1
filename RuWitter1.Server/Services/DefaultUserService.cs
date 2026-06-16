@@ -110,7 +110,7 @@ public class DefaultUserService : IDefaultUserInterface
         if(updatedUserData.Avatar != null) 
         {
             MediaFile? mediaFile = await _mediaFileService.InitMediaFile(updatedUserData.Avatar);
-            existingUser.Avatar = mediaFile;
+            if(mediaFile != null) existingUser.Avatar = mediaFile;
         }
         
 
