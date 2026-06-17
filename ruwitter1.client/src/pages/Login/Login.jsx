@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import cl from "./Login.module.css";
 
 function Login() {
@@ -7,6 +8,7 @@ function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [rememberme, setRememberme] = useState(false);
+    const [passwordVisible, setPasswordVisible] = useState(false);
     // state variable for error messages
     const [error, setError] = useState("");
     const navigate = useNavigate();
@@ -21,6 +23,11 @@ function Login() {
 
     const handleRegisterClick = () => {
         navigate("/register");
+    }
+
+    const handlePasswordVisibleClick = (e) => {
+        e.preventDefault();
+        setPasswordVisible(prev => !prev);
     }
 
     // handle submit event for the form
@@ -89,13 +96,14 @@ function Login() {
                 <div className={cl.formGroup}>
                     <label className={cl.formLabel} htmlFor="password">Пароль:</label>
                     <input
-                        type="password"
+                        type={passwordVisible ? "text" : "password"}
                         id="password"
                         name="password"
                         value={password}
                         onChange={handleChange}
                         className={cl.formInput}
                     />
+                    <button onClick={handlePasswordVisibleClick} style={{ height: '30px' }}>{passwordVisible ? <EyeOutlined /> : <EyeInvisibleOutlined />}</button>
                 </div>
                 <div className={cl.checkboxGroup}>
                     <input

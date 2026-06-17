@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import cl from "./Login/Login.module.css";
+import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 
 function Register() {
     // state variables for email and passwords
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordVisible, setPasswordVisible] = useState(false);
     const navigate = useNavigate();
 
     // state variable for error messages
@@ -14,6 +16,11 @@ function Register() {
 
     const handleLoginClick = () => {
         navigate("/login");
+    }
+
+    const handlePasswordVisibleClick = (e) => {
+        e.preventDefault();
+        setPasswordVisible(prev => !prev);
     }
 
 
@@ -86,7 +93,7 @@ function Register() {
                 <div className={cl.formGroup}>
                     <label className={cl.formLabel} htmlFor="password">Пароль:</label>
                     <input
-                        type="password"
+                        type={passwordVisible ? "text" : "password"}
                         id="password"
                         name="password"
                         value={password}
@@ -97,7 +104,7 @@ function Register() {
                 <div className={cl.formGroup}>
                     <label className={cl.formLabel} htmlFor="confirmPassword">Подтвердите пароль:</label>
                     <input
-                        type="password"
+                        type={passwordVisible ? "text" : "password"}
                         id="confirmPassword"
                         name="confirmPassword"
                         value={confirmPassword}
@@ -107,6 +114,7 @@ function Register() {
                 </div>
                 <p style={{ fontSize: '16px' }}>Пароль должен содержать 6 символов, заглавные и строчные английские буквы, цифры и специальные символы</p>
                 <div className={cl.actionButtons}>
+                    <button onClick={handlePasswordVisibleClick} style={{ height: '30px' }}>{passwordVisible ? <EyeOutlined /> : <EyeInvisibleOutlined />}</button>
                     <button type="submit" className={cl.submitBtn}>Зарегистрироваться</button>
                     <button onClick={handleLoginClick} className={cl.registerBtn}>Вернуться к авторизации</button>
                 </div>
